@@ -1,0 +1,7 @@
+- name: Apply local config
+  hosts: local
+  become: true
+  pre_tasks:
+    - import_tasks: ../tasks/pre_tasks.yml
+  tasks:
+    - import_tasks: ../tasks/debug_tasks.yml

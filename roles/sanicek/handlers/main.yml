@@ -1,0 +1,11 @@
+- name: Refresh repositories
+  command: zypper --gpg-auto-import-keys refresh
+  when: package_manager == "zypper"
+
+- name: Refresh repositories
+  command: dnf makecache
+  when: package_manager == "dnf"
+  
+- name: Refresh font cache
+  command: fc-cache -fv
+  when: font_install_command is defined

@@ -1,0 +1,8 @@
+- name: COMMON PACKAGES - Install packages
+  package:
+    name:
+      - git
+      - htop
+      - the_silver_searcher
+    state: present
+

@@ -1,0 +1,22 @@
+- name: Get the user's home directory and username
+  become: false
+  set_fact:
+    user_home: "{{ lookup('env', 'HOME') }}"
+    user_name: "{{ lookup('env', 'USER') }}"
+
+- name: Gather OS distribution information
+  ansible.builtin.setup:
+    gather_subset:
+      - 'distribution'
+
+- name: Set package manager for openSUSE
+  set_fact:
+    package_manager: "zypper"
+  when: "'openSUSE' in ansible_distribution"
+
+- name: Set package manager for Fedora
+  set_fact:
+    package_manager: "dnf"
+  when: ansible_distribution == "Fedora"
+
+- import_tasks: pre_tasks_bash.yml

@@ -1,0 +1,9 @@
+- import_tasks: common-packages.yml
+- import_tasks: power-settings.yml
+- import_tasks: chrome.yml
+- import_tasks: vs-code.yml
+- import_tasks: kitty.yml
+- import_tasks: ms-fonts.yml
+- import_tasks: bash-git-prompt.yml
+- import_tasks: bash-config.yml
+- import_tasks: fzf.yml

@@ -1,0 +1,42 @@
+- name: VS CODE - Set package manager and packages for openSUSE
+  set_fact:
+    vscode_repo_file: "/etc/zypp/repos.d/vscode.repo"
+    vscode_repo_content: |
+      [code]
+      name=Visual Studio Code
+      baseurl=https://packages.microsoft.com/yumrepos/vscode
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+  when: "'openSUSE' in ansible_distribution"
+
+- name: VS CODE - Set package manager and packages for Fedora
+  set_fact:
+    vscode_repo_file: "/etc/yum.repos.d/vscode.repo"
+    vscode_repo_content: |
+      [code]
+      name=Visual Studio Code
+      baseurl=https://packages.microsoft.com/yumrepos/vscode
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+  when: ansible_distribution == "Fedora"
+
+
+- name: VS CODE - Add Microsoft GPG key
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+
+- name: VS CODE - Add Visual Studio Code repository
+  copy:
+    dest: "{{ vscode_repo_file }}"
+    content: "{{ vscode_repo_content }}"
+  notify: Refresh repositories
+  when: vscode_repo_file is defined
+
+- name: VS CODE - Install Visual Studio Code
+  package:
+    name: code
+    state: present
+  when: package_manager is defined

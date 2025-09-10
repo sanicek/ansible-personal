@@ -1,0 +1,10 @@
+- name: Apply local config
+  hosts: local
+  become: true
+  pre_tasks:
+    - import_tasks: ../tasks/pre_tasks.yml
+  tasks:
+    - import_tasks: ../roles/sanicek/tasks/chrome.yml
+    - import_tasks: ../roles/sanicek/tasks/vs-code.yml
+  handlers:
+    - import_tasks: ../roles/sanicek/handlers/main.yml

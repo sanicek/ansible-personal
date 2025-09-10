@@ -1,0 +1,75 @@
+- name: BASH-GIT-PROMPT - Clone bash-git-prompt repository
+  git:
+    repo: 'https://github.com/magicmonty/bash-git-prompt.git'
+    dest: '/usr/local/share/bash-git-prompt'
+    clone: yes
+    update: yes
+
+- name: BASH-GIT-PROMPT - Add bash-git-prompt to users bashrc 
+  blockinfile:
+    path: "{{ user_home }}/.bashrc"  
+    block: |
+      if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
+        
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
+        
+        GIT_PROMPT_ONLY_IN_REPO=0
+        
+        GIT_PROMPT_THEME=Solarized
+        
+        # Function to format the path with ~ for home directory
+        function set_title {
+          local DIR=$(pwd | sed "s|^$HOME|~|")
+          if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            # SSH session: Set terminal title to user@host:dir
+            echo -ne "\033]0;${USER}@${HOSTNAME}:${DIR}\007"
+          else
+            # Local session: Set terminal title to current directory only
+            echo -ne "\033]0;${DIR}\007"
+          fi
+        }
+
+        # Set PROMPT_COMMAND to call the set_title function
+        PROMPT_COMMAND=set_title
+        
+        GIT_PROMPT_START_USER="\u@\h:\w"
+        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+        
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
+    create: yes
+  become: no  # Run this as the target user, not root
+
+- name: BASH-GIT-PROMPT - Add bash-git-prompt to bashrc.local
+  blockinfile:
+    path: "/etc/bash.bashrc.local"  
+    block: |
+      if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
+        
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
+        
+        GIT_PROMPT_ONLY_IN_REPO=0
+        
+        GIT_PROMPT_THEME=Solarized
+        
+        # Function to format the path with ~ for home directory
+        function set_title {
+          local DIR=$(pwd | sed "s|^$HOME|~|")
+          if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            # SSH session: Set terminal title to user@host:dir
+            echo -ne "\033]0;${USER}@${HOSTNAME}:${DIR}\007"
+          else
+            # Local session: Set terminal title to current directory only
+            echo -ne "\033]0;${DIR}\007"
+          fi
+        }
+
+        # Set PROMPT_COMMAND to call the set_title function
+        PROMPT_COMMAND=set_title
+        
+        GIT_PROMPT_START_USER="\u@\h:\w"
+        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+        
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
+    create: yes

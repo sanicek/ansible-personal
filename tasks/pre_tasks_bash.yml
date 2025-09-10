@@ -1,0 +1,69 @@
+# tasks/setup_bash_files.yml
+
+- name: Ensure .bash_profile exists for root
+  file:
+    path: /root/.bash_profile
+    state: touch
+  become: true
+
+- name: Ensure .bashrc exists for root
+  file:
+    path: /root/.bashrc
+    state: touch
+  become: true
+
+- name: Ensure .bash_profile sources .bashrc for root
+  lineinfile:
+    path: /root/.bash_profile
+    regexp: 'if \[ -f ~/.bashrc \]; then source ~/.bashrc; fi'
+    line: 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi'
+    state: present
+  become: true
+
+- name: Ensure .bashrc has condition to end if not interactive for root
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '\[\[ \$- != \*i\* \]\] && return'
+    line: '[[ $- != *i* ]] && return'
+    state: present
+  become: true
+
+- name: Ensure .bash_profile exists for current user
+  file:
+    path: "{{ user_home }}/.bash_profile"
+    state: touch
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Ensure .bashrc exists for current user
+  file:
+    path: "{{ user_home }}/.bashrc"
+    state: touch
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Ensure .bash_profile sources .bashrc for current user
+  lineinfile:
+    path: "{{ user_home }}/.bash_profile"
+    regexp: 'if \[ -f ~/.bashrc \]; then source ~/.bashrc; fi'
+    line: 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi'
+    state: present
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Ensure .bashrc has condition to end if not interactive for current user
+  lineinfile:
+    path: "{{ user_home }}/.bashrc"
+    regexp: '\[\[ \$- != \*i\* \]\] && return'
+    line: '[[ $- != *i* ]] && return'
+    state: present
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"

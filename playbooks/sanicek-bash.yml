@@ -1,0 +1,11 @@
+- name: Apply local config
+  hosts: local
+  become: true
+  pre_tasks:
+    - import_tasks: ../tasks/pre_tasks.yml
+  tasks:
+    - import_tasks: ../roles/sanicek/tasks/bash-config.yml
+    - import_tasks: ../roles/sanicek/tasks/bash-git-prompt.yml
+    - import_tasks: ../roles/sanicek/tasks/fzf.yml
+  handlers:
+    - import_tasks: ../roles/sanicek/handlers/main.yml
