@@ -1,1 +1,2 @@
 *.tar.gz
+ansible_collections/sanicek/personal/inventories/local/host_vars/localhost.yml

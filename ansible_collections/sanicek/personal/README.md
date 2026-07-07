@@ -4,6 +4,14 @@ Personal configuration-as-code Ansible collection.
 
 The current content targets Fedora and Arch Linux. Platform support is organized through separate platform-specific roles instead of compatibility branches inside roles.
 
+## Bootstrap
+
+For first-run Arch Linux setup, use the repository-level `bootstrap.sh` script before running collection playbooks. It installs the minimal baseline needed for follow-up local Ansible runs.
+
+## Local Variables
+
+Committed local defaults live in `inventories/local/group_vars/all.yml`. Private localhost overrides should be copied from `inventories/local/host_vars/localhost.yml.example` to the gitignored `inventories/local/host_vars/localhost.yml`.
+
 ## Playbooks
 
 Run from the repository root.

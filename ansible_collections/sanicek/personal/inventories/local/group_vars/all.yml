@@ -1,0 +1,3 @@
+# Shared defaults for local personal playbooks.
+# Keep this file committed for non-secret defaults used by all local runs.
+{}
