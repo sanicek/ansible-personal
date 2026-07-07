@@ -13,6 +13,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstati
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_gui_apps.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_terminal.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
@@ -23,7 +24,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/debug_facts.yml
 
 Fedora currently has workstation, shell, GUI application, and terminal playbooks.
 
-Arch Linux currently has shell environment, cloud CLI, and Kubernetes CLI setup.
+Arch Linux currently has terminal, shell environment, cloud CLI, and Kubernetes CLI setup.
 
 ## Build
 

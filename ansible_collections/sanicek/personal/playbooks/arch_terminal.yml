@@ -1,0 +1,7 @@
+- name: Apply Arch terminal configuration
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_kitty
+    - sanicek.personal.arch_fonts
