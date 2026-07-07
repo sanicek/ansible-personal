@@ -1,0 +1,15 @@
+galaxy_info:
+  author: sanicek
+  description: Arch Linux Yazi setup with Solarized Dark flavor.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - shell
+    - yazi
+dependencies: []

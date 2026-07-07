@@ -1,0 +1,20 @@
+- name: Gather distribution facts when needed
+  ansible.builtin.setup:
+    gather_subset:
+      - distribution
+  when: "'distribution' not in ansible_facts"
+
+- name: Require Fedora
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["distribution"] == "Fedora"
+    fail_msg: "This role supports Fedora only. Detected: {{ ansible_facts['distribution'] | default('unknown') }}."
+
+- name: Set current user facts
+  ansible.builtin.set_fact:
+    user_home: "{{ lookup('ansible.builtin.env', 'HOME') }}"
+    user_name: "{{ lookup('ansible.builtin.env', 'USER') }}"
+    package_manager: dnf
+
+- name: Prepare Bash files
+  ansible.builtin.import_tasks: bash_files.yml

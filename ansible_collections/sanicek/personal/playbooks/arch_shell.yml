@@ -1,0 +1,10 @@
+- name: Apply Arch shell configuration
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_common_packages
+    - sanicek.personal.arch_shell
+    - sanicek.personal.arch_bash_git_prompt
+    - sanicek.personal.arch_fzf
+    - sanicek.personal.arch_yazi

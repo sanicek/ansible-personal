@@ -1,0 +1,4 @@
+- name: Install AWS CLI v2
+  community.general.pacman:
+    name: "{{ arch_aws_cli_package }}"
+    state: present

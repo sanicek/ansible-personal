@@ -1,0 +1,9 @@
+- name: Display local facts
+  hosts: local
+  become: true
+  tasks:
+    - name: Display OS distribution facts
+      ansible.builtin.debug:
+        msg:
+          - "Distribution: {{ ansible_facts['distribution'] }}"
+          - "Release: {{ ansible_facts['distribution_release'] }}"

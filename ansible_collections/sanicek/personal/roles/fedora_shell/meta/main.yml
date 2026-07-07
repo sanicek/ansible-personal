@@ -1,0 +1,14 @@
+galaxy_info:
+  author: sanicek
+  description: Fedora Bash configuration.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - fedora
+    - shell
+    - bash
+dependencies: []

@@ -1,0 +1,50 @@
+- name: Add Bash configuration to user profile
+  ansible.builtin.blockinfile:
+    path: "{{ user_home }}/.bashrc"
+    block: |
+      # history setup
+      HISTCONTROL=ignoreboth
+      shopt -s histappend
+      HISTSIZE=1000
+      HISTFILESIZE=2000
+
+      shopt -s checkwinsize
+
+      # enable color support of ls and also add handy aliases
+      if [ -x /usr/bin/dircolors ]; then
+        test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+        alias ls='ls --color=auto'
+
+        alias grep='grep --color=auto'
+        alias fgrep='fgrep --color=auto'
+        alias egrep='egrep --color=auto'
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bashrc"
+    create: true
+    mode: "0644"
+  become: false
+
+- name: Add Bash configuration to Arch system bashrc
+  ansible.builtin.blockinfile:
+    path: /etc/bash.bashrc
+    block: |
+      # history setup
+      HISTCONTROL=ignoreboth
+      shopt -s histappend
+      HISTSIZE=1000
+      HISTFILESIZE=2000
+
+      shopt -s checkwinsize
+
+      # enable color support of ls and also add handy aliases
+      if [ -x /usr/bin/dircolors ]; then
+        test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+        alias ls='ls --color=auto'
+
+        alias grep='grep --color=auto'
+        alias fgrep='fgrep --color=auto'
+        alias egrep='egrep --color=auto'
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bashrc"
+    create: true
+    mode: "0644"

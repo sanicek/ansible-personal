@@ -1,0 +1,7 @@
+- name: Apply Fedora terminal configuration
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.fedora_bootstrap
+    - sanicek.personal.fedora_kitty
+    - sanicek.personal.fedora_fonts

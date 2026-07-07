@@ -1,0 +1,9 @@
+- name: Install Arch Kubernetes CLIs
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_kubectl
+    - sanicek.personal.arch_helm
+    - sanicek.personal.arch_k9s
+    - sanicek.personal.arch_kubectx

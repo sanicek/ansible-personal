@@ -1,5 +1,0 @@
-- name: Display OS distribution facts
-  debug:
-    msg:
-      - "Distribution: {{ ansible_distribution }}"
-      - "Release: {{ ansible_distribution_release }}"

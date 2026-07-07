@@ -1,0 +1,9 @@
+- name: Apply Fedora shell configuration
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.fedora_bootstrap
+    - sanicek.personal.fedora_common_packages
+    - sanicek.personal.fedora_shell
+    - sanicek.personal.fedora_bash_git_prompt
+    - sanicek.personal.fedora_fzf

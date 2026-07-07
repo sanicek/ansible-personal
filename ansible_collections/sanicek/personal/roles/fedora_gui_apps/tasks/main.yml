@@ -1,0 +1,5 @@
+- name: Configure Google Chrome
+  ansible.builtin.import_tasks: chrome.yml
+
+- name: Configure Visual Studio Code
+  ansible.builtin.import_tasks: vscode.yml
