@@ -1,0 +1,9 @@
+- name: Install Arch cloud CLIs
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_terraform
+    - sanicek.personal.arch_aws_cli
+    - sanicek.personal.arch_azure_cli
+    - sanicek.personal.arch_vault

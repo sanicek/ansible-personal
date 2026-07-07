@@ -1,0 +1,4 @@
+- name: Install Terraform
+  community.general.pacman:
+    name: "{{ arch_terraform_package }}"
+    state: present

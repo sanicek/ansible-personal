@@ -20,6 +20,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_gui_apps.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_terminal.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
 ```
 
 ## Validation
@@ -27,5 +28,6 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml --syntax-check
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ```

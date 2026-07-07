@@ -1,0 +1,4 @@
+- name: Install Azure CLI
+  community.general.pacman:
+    name: "{{ arch_azure_cli_package }}"
+    state: present

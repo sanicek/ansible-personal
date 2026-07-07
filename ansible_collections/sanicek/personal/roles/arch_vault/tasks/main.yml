@@ -1,0 +1,4 @@
+- name: Install Vault CLI
+  community.general.pacman:
+    name: "{{ arch_vault_package }}"
+    state: present
