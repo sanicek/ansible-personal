@@ -6,7 +6,7 @@ The current content targets Fedora and Arch Linux. Platform support is organized
 
 ## Bootstrap
 
-For first-run Arch Linux setup, use the repository-level `bootstrap.sh` script before running collection playbooks. It installs the minimal baseline needed for follow-up local Ansible runs.
+For first-run Arch Linux setup, use the repository-level `scripts/bootstrap.sh` script before running collection playbooks. It installs the minimal baseline needed for follow-up local Ansible runs.
 
 ## Local Variables
 

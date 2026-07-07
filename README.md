@@ -15,7 +15,7 @@ Current content targets Fedora and Arch Linux. Platform support is organized thr
 For a fresh Arch Linux host, run the minimal bootstrap script first:
 
 ```bash
-sudo bash bootstrap.sh [username]
+sudo bash scripts/bootstrap.sh [username]
 ```
 
 The username defaults to `cac`. The script installs `sudo`, `git`, and `ansible`, creates the user, adds it to `wheel`, and configures passwordless sudo for follow-up Ansible runs.
