@@ -1,0 +1,33 @@
+- name: Install Yazi packages
+  community.general.pacman:
+    name: "{{ arch_yazi_packages }}"
+    state: present
+
+- name: Ensure Yazi configuration directory exists
+  ansible.builtin.file:
+    path: "{{ user_home }}/.config/yazi"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: true
+
+- name: Install Yazi Solarized Dark flavor
+  ansible.builtin.command: "ya pkg add {{ arch_yazi_flavor_package }}"
+  args:
+    creates: "{{ user_home }}/.config/yazi/flavors/{{ arch_yazi_flavor }}.yazi"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Configure Yazi Solarized Dark flavor
+  ansible.builtin.copy:
+    dest: "{{ user_home }}/.config/yazi/theme.toml"
+    content: |
+      [flavor]
+      dark = "{{ arch_yazi_flavor }}"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: true

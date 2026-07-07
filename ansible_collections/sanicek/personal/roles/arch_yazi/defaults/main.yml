@@ -1,0 +1,12 @@
+arch_yazi_packages:
+  - yazi
+  - file
+  - git
+  - fzf
+  - ripgrep
+  - fd
+  - jq
+  - ttf-inconsolata-nerd
+
+arch_yazi_flavor: solarized-dark
+arch_yazi_flavor_package: yazi-rs/flavors:solarized-dark

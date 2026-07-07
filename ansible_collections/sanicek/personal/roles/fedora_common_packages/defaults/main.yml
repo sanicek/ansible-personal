@@ -3,3 +3,5 @@ fedora_common_packages:
   - htop
   - the_silver_searcher
   - ripgrep
+  - jq
+  - gron
