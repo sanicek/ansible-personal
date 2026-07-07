@@ -12,10 +12,21 @@
     group: "{{ user_name }}"
   become: true
 
+- name: Remove obsolete Yazi package entries
+  ansible.builtin.command: "ya pkg delete {{ item }}"
+  loop: "{{ arch_yazi_obsolete_packages }}"
+  register: arch_yazi_obsolete_delete
+  changed_when: arch_yazi_obsolete_delete.rc == 0
+  failed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
 - name: Install Yazi Solarized Dark flavor
   ansible.builtin.command: "ya pkg add {{ arch_yazi_flavor_package }}"
   args:
-    creates: "{{ user_home }}/.config/yazi/flavors/{{ arch_yazi_flavor }}.yazi"
+    creates: "{{ user_home }}/.config/yazi/flavors/{{ arch_yazi_flavor }}.yazi/flavor.toml"
   become: true
   become_user: "{{ user_name }}"
   environment:

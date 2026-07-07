@@ -8,5 +8,8 @@ arch_yazi_packages:
   - jq
   - ttf-inconsolata-nerd
 
-arch_yazi_flavor: solarized-dark
-arch_yazi_flavor_package: yazi-rs/flavors:solarized-dark
+arch_yazi_flavor: solarized
+arch_yazi_flavor_package: peterfication/solarized
+
+arch_yazi_obsolete_packages:
+  - yazi-rs/flavors:solarized-dark
