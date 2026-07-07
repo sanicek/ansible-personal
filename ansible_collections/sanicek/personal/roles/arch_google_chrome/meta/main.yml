@@ -1,0 +1,15 @@
+galaxy_info:
+  author: sanicek
+  description: Google Chrome setup on Arch Linux using AUR.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - browser
+    - chrome
+dependencies: []

@@ -1,0 +1,48 @@
+- name: Install Bash package
+  community.general.pacman:
+    name: bash
+    state: present
+
+- name: Ensure Bash is listed as a valid shell
+  ansible.builtin.lineinfile:
+    path: /etc/shells
+    regexp: "^{{ item | regex_escape }}$"
+    line: "{{ item }}"
+    state: present
+    create: true
+    mode: "0644"
+  loop: "{{ arch_bootstrap_valid_shells }}"
+
+- name: Set root login shell to Bash
+  ansible.builtin.user:
+    name: root
+    shell: "{{ arch_bootstrap_shell }}"
+
+- name: Set current user login shell to Bash
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    shell: "{{ arch_bootstrap_shell }}"
+
+- name: Check default shell for future users
+  ansible.builtin.command: useradd -D
+  register: arch_bootstrap_useradd_defaults
+  changed_when: false
+
+- name: Set default shell for future users
+  ansible.builtin.command: "useradd -D --shell {{ arch_bootstrap_shell }}"
+  when: "('SHELL=' ~ arch_bootstrap_shell) not in arch_bootstrap_useradd_defaults.stdout"
+
+- name: Check whether AccountsService tracks current user
+  ansible.builtin.stat:
+    path: "/var/lib/AccountsService/users/{{ user_name }}"
+  register: arch_bootstrap_accountsservice_user
+
+- name: Set AccountsService shell for current user when present
+  community.general.ini_file:
+    path: "/var/lib/AccountsService/users/{{ user_name }}"
+    section: User
+    option: Shell
+    value: "{{ arch_bootstrap_shell }}"
+    no_extra_spaces: true
+    mode: "0600"
+  when: arch_bootstrap_accountsservice_user.stat.exists

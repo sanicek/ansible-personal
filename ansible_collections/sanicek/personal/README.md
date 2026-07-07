@@ -21,6 +21,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstati
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_gui_apps.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_terminal.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gui_apps.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
@@ -32,7 +33,9 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/debug_facts.yml
 
 Fedora currently has workstation, shell, GUI application, and terminal playbooks.
 
-Arch Linux currently has terminal, shell environment, cloud CLI, and Kubernetes CLI setup.
+Arch Linux currently has GUI application, terminal, shell environment, cloud CLI, and Kubernetes CLI setup.
+
+The Arch GUI application playbook uses AUR for Google Chrome and Visual Studio Code because their official proprietary builds are needed for cloud sync. KeePassXC is installed from native Arch Linux packages.
 
 ## Build
 

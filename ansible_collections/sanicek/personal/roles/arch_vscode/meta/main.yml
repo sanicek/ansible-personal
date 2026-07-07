@@ -1,0 +1,15 @@
+galaxy_info:
+  author: sanicek
+  description: Visual Studio Code setup on Arch Linux using AUR.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - editor
+    - vscode
+dependencies: []

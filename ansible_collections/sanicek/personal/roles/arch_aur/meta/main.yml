@@ -1,0 +1,14 @@
+galaxy_info:
+  author: sanicek
+  description: Arch Linux AUR helper setup.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - aur
+dependencies: []

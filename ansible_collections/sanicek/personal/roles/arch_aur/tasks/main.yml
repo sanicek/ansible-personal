@@ -1,0 +1,44 @@
+- name: Install AUR build prerequisites
+  community.general.pacman:
+    name:
+      - base-devel
+      - git
+    state: present
+
+- name: Check whether AUR helper is installed
+  ansible.builtin.stat:
+    path: "/usr/bin/{{ arch_aur_helper }}"
+  register: arch_aur_helper_binary
+
+- name: Ensure AUR build directory exists
+  ansible.builtin.file:
+    path: "{{ arch_aur_build_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: not arch_aur_helper_binary.stat.exists
+
+- name: Clone AUR helper repository
+  ansible.builtin.git:
+    repo: "{{ arch_aur_helper_repo }}"
+    dest: "{{ arch_aur_build_dir }}/{{ arch_aur_helper_package }}"
+    version: master
+    update: true
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  when: not arch_aur_helper_binary.stat.exists
+
+- name: Build and install AUR helper
+  ansible.builtin.command: makepkg -si --noconfirm --needed
+  args:
+    chdir: "{{ arch_aur_build_dir }}/{{ arch_aur_helper_package }}"
+    creates: "/usr/bin/{{ arch_aur_helper }}"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  when: not arch_aur_helper_binary.stat.exists

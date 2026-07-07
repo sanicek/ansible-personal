@@ -1,0 +1,9 @@
+- name: Install Arch GUI applications
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_aur
+    - sanicek.personal.arch_google_chrome
+    - sanicek.personal.arch_vscode
+    - sanicek.personal.arch_keepassxc

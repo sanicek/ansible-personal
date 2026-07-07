@@ -1,0 +1,4 @@
+- name: Install KeePassXC
+  community.general.pacman:
+    name: keepassxc
+    state: present

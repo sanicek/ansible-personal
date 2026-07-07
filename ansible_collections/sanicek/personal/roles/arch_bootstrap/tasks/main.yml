@@ -4,17 +4,20 @@
       - distribution
   when: "'distribution' not in ansible_facts"
 
-- name: Require Arch Linux
+- name: Require Arch Linux or compatible derivative
   ansible.builtin.assert:
     that:
-      - ansible_facts["distribution"] == "Archlinux"
-    fail_msg: "This role supports Arch Linux only. Detected: {{ ansible_facts['distribution'] | default('unknown') }}."
+      - ansible_facts["distribution"] in arch_bootstrap_supported_distributions
+    fail_msg: "This role supports Arch Linux compatible systems only. Detected: {{ ansible_facts['distribution'] | default('unknown') }}."
 
 - name: Set current user facts
   ansible.builtin.set_fact:
     user_home: "{{ lookup('ansible.builtin.env', 'HOME') }}"
     user_name: "{{ lookup('ansible.builtin.env', 'USER') }}"
     package_manager: pacman
+
+- name: Ensure Bash login shell setup
+  ansible.builtin.import_tasks: bash_shell.yml
 
 - name: Prepare Bash files
   ansible.builtin.import_tasks: bash_files.yml
