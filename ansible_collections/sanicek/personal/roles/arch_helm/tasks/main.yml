@@ -1,0 +1,4 @@
+- name: Install Helm
+  community.general.pacman:
+    name: "{{ arch_helm_package }}"
+    state: present

@@ -1,0 +1,4 @@
+- name: Install k9s
+  community.general.pacman:
+    name: "{{ arch_k9s_package }}"
+    state: present

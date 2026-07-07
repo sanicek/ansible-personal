@@ -1,0 +1,4 @@
+- name: Install kubectl
+  community.general.pacman:
+    name: "{{ arch_kubectl_package }}"
+    state: present
