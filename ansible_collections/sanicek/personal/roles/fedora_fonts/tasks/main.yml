@@ -1,0 +1,5 @@
+- name: Install Microsoft core fonts package
+  ansible.builtin.dnf:
+    name: mscore-fonts
+    state: present
+  notify: Refresh font cache

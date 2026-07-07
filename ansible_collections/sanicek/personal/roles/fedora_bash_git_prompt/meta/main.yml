@@ -1,0 +1,14 @@
+galaxy_info:
+  author: sanicek
+  description: Fedora bash-git-prompt setup.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - fedora
+    - shell
+    - prompt
+dependencies: []

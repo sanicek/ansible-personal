@@ -1,0 +1,5 @@
+arch_common_packages:
+  - git
+  - htop
+  - the_silver_searcher
+  - ripgrep

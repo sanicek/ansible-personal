@@ -1,0 +1,4 @@
+- name: Install common packages
+  community.general.pacman:
+    name: "{{ arch_common_packages }}"
+    state: present

@@ -1,0 +1,74 @@
+- name: Install git
+  ansible.builtin.dnf:
+    name: git
+    state: present
+
+- name: Clone bash-git-prompt repository
+  ansible.builtin.git:
+    repo: https://github.com/magicmonty/bash-git-prompt.git
+    dest: /usr/local/share/bash-git-prompt
+    clone: true
+    update: true
+
+- name: Add bash-git-prompt to user's bashrc
+  ansible.builtin.blockinfile:
+    path: "{{ user_home }}/.bashrc"
+    block: |
+      if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
+
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
+
+        GIT_PROMPT_ONLY_IN_REPO=0
+
+        GIT_PROMPT_THEME=Solarized
+
+        function set_title {
+          local DIR=$(pwd | sed "s|^$HOME|~|")
+          if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            echo -ne "\033]0;${USER}@${HOSTNAME}:${DIR}\007"
+          else
+            echo -ne "\033]0;${DIR}\007"
+          fi
+        }
+
+        PROMPT_COMMAND=set_title
+
+        GIT_PROMPT_START_USER="\u@\h:\w"
+        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
+    create: true
+    mode: "0644"
+  become: false
+
+- name: Add bash-git-prompt to Fedora system bashrc
+  ansible.builtin.blockinfile:
+    path: /etc/bashrc
+    block: |
+      if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
+
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
+
+        GIT_PROMPT_ONLY_IN_REPO=0
+
+        GIT_PROMPT_THEME=Solarized
+
+        function set_title {
+          local DIR=$(pwd | sed "s|^$HOME|~|")
+          if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            echo -ne "\033]0;${USER}@${HOSTNAME}:${DIR}\007"
+          else
+            echo -ne "\033]0;${DIR}\007"
+          fi
+        }
+
+        PROMPT_COMMAND=set_title
+
+        GIT_PROMPT_START_USER="\u@\h:\w"
+        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
+    create: true
+    mode: "0644"

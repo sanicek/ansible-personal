@@ -1,0 +1,24 @@
+- name: Install Kitty packages
+  ansible.builtin.dnf:
+    name:
+      - kitty
+      - kitty-terminfo
+    state: present
+
+- name: Ensure Kitty configuration directory exists
+  ansible.builtin.file:
+    path: "{{ user_home }}/.config/kitty"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+
+- name: Copy custom Kitty configuration
+  ansible.builtin.copy:
+    src: kitty/kitty.conf
+    dest: "{{ user_home }}/.config/kitty/kitty.conf"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false

@@ -1,0 +1,6 @@
+- name: Install Fedora GUI applications
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.fedora_bootstrap
+    - sanicek.personal.fedora_gui_apps

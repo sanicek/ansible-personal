@@ -1,0 +1,21 @@
+- name: Add Google Chrome repository key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://dl.google.com/linux/linux_signing_key.pub
+
+- name: Add Google Chrome repository
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/google-chrome.repo
+    content: |
+      [google-chrome]
+      name=google-chrome - 64-bit
+      baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
+      enabled=1
+      gpgcheck=1
+    mode: "0644"
+  notify: Refresh dnf repositories
+
+- name: Install Google Chrome
+  ansible.builtin.dnf:
+    name: google-chrome-stable
+    state: present

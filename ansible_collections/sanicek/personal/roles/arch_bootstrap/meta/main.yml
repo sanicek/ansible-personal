@@ -1,0 +1,14 @@
+galaxy_info:
+  author: sanicek
+  description: Bootstrap facts and shell files for Arch Linux hosts.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - bootstrap
+dependencies: []

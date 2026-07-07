@@ -1,0 +1,65 @@
+- name: Disable hibernation and sleep targets
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    masked: true
+  loop:
+    - sleep.target
+    - suspend.target
+    - hibernate.target
+    - hybrid-sleep.target
+    - suspend-then-hibernate.target
+
+- name: Disable lock screen
+  ansible.builtin.command: gsettings set org.gnome.desktop.screensaver lock-enabled false
+  changed_when: true
+
+- name: Disable automatic suspend on AC power
+  ansible.builtin.command: gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
+  changed_when: true
+
+- name: Disable automatic suspend on battery power
+  ansible.builtin.command: gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
+  changed_when: true
+
+- name: Set idle delay to never
+  ansible.builtin.command: gsettings set org.gnome.desktop.session idle-delay 0
+  changed_when: true
+
+- name: Disable screensaver activation
+  ansible.builtin.command: gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
+  changed_when: true
+
+- name: Disable lock on suspend
+  ansible.builtin.command: gsettings set org.gnome.desktop.lockdown disable-lock-screen true
+  changed_when: true
+
+- name: Disable screen lock after resume
+  ansible.builtin.command: gsettings set org.gnome.desktop.screensaver lock-delay 0
+  changed_when: true
+
+- name: Ensure /etc/systemd/logind.conf exists
+  ansible.builtin.file:
+    path: /etc/systemd/logind.conf
+    state: touch
+    mode: "0644"
+
+- name: Configure logind power handling
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: "^#?{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+    create: true
+    mode: "0644"
+  loop:
+    - key: HandleSuspendKey
+      value: ignore
+    - key: HandleLidSwitch
+      value: ignore
+    - key: HandleLidSwitchDocked
+      value: ignore
+    - key: HandleHibernateKey
+      value: ignore
+    - key: HandleSleepKey
+      value: ignore
+    - key: IdleAction
+      value: ignore

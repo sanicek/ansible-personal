@@ -1,6 +1,0 @@
-- name: MS-FONTS - Install MS font package on Fedora
-  dnf:
-    name: "mscore-fonts"
-    state: present
-  when: ansible_distribution == "Fedora"
-  notify: Refresh font cache

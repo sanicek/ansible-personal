@@ -1,0 +1,13 @@
+- name: Apply Fedora workstation configuration
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.fedora_bootstrap
+    - sanicek.personal.fedora_common_packages
+    - sanicek.personal.fedora_power
+    - sanicek.personal.fedora_gui_apps
+    - sanicek.personal.fedora_kitty
+    - sanicek.personal.fedora_fonts
+    - sanicek.personal.fedora_bash_git_prompt
+    - sanicek.personal.fedora_shell
+    - sanicek.personal.fedora_fzf

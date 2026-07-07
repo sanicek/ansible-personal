@@ -1,0 +1,18 @@
+namespace: sanicek
+name: personal
+version: 0.1.0
+readme: README.md
+authors:
+  - sanicek
+description: Personal configuration-as-code Ansible collection.
+license:
+  - MIT
+tags:
+  - arch
+  - archlinux
+  - fedora
+  - linux
+  - personal
+  - workstation
+dependencies:
+  community.general: ">=8.0.0"
