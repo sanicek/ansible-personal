@@ -48,6 +48,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_gui_apps.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_terminal.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gui_apps.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
@@ -61,6 +62,7 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gui_apps.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml --syntax-check

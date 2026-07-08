@@ -1,0 +1,6 @@
+- name: Install Arch opencode
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_opencode

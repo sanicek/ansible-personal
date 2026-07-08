@@ -1,0 +1,14 @@
+arch_opencode_package: opencode
+
+arch_opencode_configure_ollama: false
+arch_opencode_config_path: "{{ user_home }}/.config/opencode/opencode.jsonc"
+
+arch_opencode_ollama_provider_id: ollama
+arch_opencode_ollama_provider_name: "Ollama (local)"
+arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
+arch_opencode_ollama_models: {}
+arch_opencode_ollama_context_length: ""
+arch_opencode_ollama_output_limit: 8192
+
+arch_opencode_set_default_model: false
+arch_opencode_model: ""

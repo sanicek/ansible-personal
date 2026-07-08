@@ -4,6 +4,18 @@
 # sanicek.personal examples:
 # personal_some_setting: value
 
+# sanicek.personal.arch_opencode examples:
+# arch_opencode_configure_ollama: true
+# arch_opencode_set_default_model: true
+# arch_opencode_model: "ollama/qwen3.6:35b"
+# arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
+# arch_opencode_ollama_models:
+#   qwen3.6:35b:
+#     name: "Qwen3.6 35B (local Ollama)"
+#     tool_call: true
+#     reasoning: true
+#     attachment: true
+
 # sanicek.server.arch_ollama examples:
 # arch_ollama_host: "127.0.0.1:11434"
 # arch_ollama_host: "0.0.0.0:11434"
