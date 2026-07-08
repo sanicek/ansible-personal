@@ -1,0 +1,8 @@
+[Service]
+Environment="OLLAMA_HOST={{ arch_ollama_host }}"
+{% if arch_ollama_context_length | string | length > 0 %}
+Environment="OLLAMA_CONTEXT_LENGTH={{ arch_ollama_context_length }}"
+{% endif %}
+{% if arch_ollama_rocm_hsa_override_gfx_version | string | length > 0 %}
+Environment="HSA_OVERRIDE_GFX_VERSION={{ arch_ollama_rocm_hsa_override_gfx_version }}"
+{% endif %}

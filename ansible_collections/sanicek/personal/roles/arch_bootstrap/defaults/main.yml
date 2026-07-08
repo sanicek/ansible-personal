@@ -1,0 +1,8 @@
+arch_bootstrap_supported_distributions:
+  - Archlinux
+  - CachyOS
+
+arch_bootstrap_shell: /bin/bash
+arch_bootstrap_valid_shells:
+  - /bin/bash
+  - /usr/bin/bash

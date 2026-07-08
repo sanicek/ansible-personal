@@ -1,0 +1,5 @@
+- name: Install Arch Ollama server
+  hosts: local
+  become: true
+  roles:
+    - sanicek.server.arch_ollama

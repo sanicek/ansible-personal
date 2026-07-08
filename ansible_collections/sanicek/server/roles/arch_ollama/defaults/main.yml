@@ -1,0 +1,26 @@
+arch_ollama_supported_distributions:
+  - Archlinux
+  - CachyOS
+
+arch_ollama_backend: rocm
+arch_ollama_host: "127.0.0.1:11434"
+arch_ollama_context_length: ""
+arch_ollama_models:
+  - qwen3.6:35b
+arch_ollama_install_diagnostics: true
+arch_ollama_rocm_hsa_override_gfx_version: ""
+arch_ollama_manage_firewall: true
+arch_ollama_firewall_rules:
+  - port: "11434"
+    proto: tcp
+    rule: allow
+    comment: Ollama API
+
+arch_ollama_packages:
+  cpu: ollama
+  rocm: ollama-rocm
+  vulkan: ollama-vulkan
+
+arch_ollama_diagnostic_packages:
+  - rocminfo
+  - amdgpu_top

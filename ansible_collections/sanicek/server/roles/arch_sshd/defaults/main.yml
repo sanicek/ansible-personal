@@ -1,0 +1,12 @@
+arch_sshd_supported_distributions:
+  - Archlinux
+  - CachyOS
+
+arch_sshd_package: openssh
+arch_sshd_service: sshd.service
+arch_sshd_manage_firewall: true
+arch_sshd_firewall_rules:
+  - port: "22"
+    proto: tcp
+    rule: allow
+    comment: SSH

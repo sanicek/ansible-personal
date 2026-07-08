@@ -1,0 +1,95 @@
+- name: Install opencode
+  community.general.pacman:
+    name: "{{ arch_opencode_package }}"
+    state: present
+
+- name: Ensure opencode configuration directory exists
+  ansible.builtin.file:
+    path: "{{ arch_opencode_config_path | dirname }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_configure_ollama
+
+- name: Check existing opencode configuration
+  ansible.builtin.stat:
+    path: "{{ arch_opencode_config_path }}"
+  register: arch_opencode_config_file
+  become: false
+  when: arch_opencode_configure_ollama
+
+- name: Read existing opencode configuration
+  ansible.builtin.slurp:
+    path: "{{ arch_opencode_config_path }}"
+  register: arch_opencode_config_content
+  become: false
+  when:
+    - arch_opencode_configure_ollama
+    - arch_opencode_config_file.stat.exists
+
+- name: Parse existing opencode configuration
+  ansible.builtin.set_fact:
+    arch_opencode_existing_config: >-
+      {{ (arch_opencode_config_content.content | b64decode | from_json)
+         if arch_opencode_config_file.stat.exists
+         else {} }}
+  when: arch_opencode_configure_ollama
+
+- name: Build opencode Ollama model configuration
+  ansible.builtin.set_fact:
+    arch_opencode_ollama_model_config: "{{ arch_opencode_ollama_models }}"
+  when: arch_opencode_configure_ollama
+
+- name: Apply opencode Ollama model limits
+  ansible.builtin.set_fact:
+    arch_opencode_ollama_model_config: >-
+      {{ arch_opencode_ollama_model_config | combine({
+        item.key: item.value | combine({
+          'limit': {
+            'context': arch_opencode_ollama_context_length | int,
+            'output': arch_opencode_ollama_output_limit | int
+          }
+        }, recursive=true)
+      }, recursive=true) }}
+  loop: "{{ arch_opencode_ollama_models | dict2items }}"
+  when:
+    - arch_opencode_configure_ollama
+    - arch_opencode_ollama_context_length | string | length > 0
+
+- name: Build opencode Ollama provider configuration
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config:
+      "$schema": "https://opencode.ai/config.json"
+      provider: >-
+        {{ {
+          arch_opencode_ollama_provider_id: {
+            'npm': '@ai-sdk/openai-compatible',
+            'name': arch_opencode_ollama_provider_name,
+            'options': {
+              'baseURL': arch_opencode_ollama_base_url
+            },
+            'models': arch_opencode_ollama_model_config
+          }
+        } }}
+  when: arch_opencode_configure_ollama
+
+- name: Configure opencode default model
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config | combine({'model': arch_opencode_model}, recursive=true) }}
+  when:
+    - arch_opencode_configure_ollama
+    - arch_opencode_set_default_model
+    - arch_opencode_model | length > 0
+
+- name: Write opencode configuration
+  ansible.builtin.copy:
+    dest: "{{ arch_opencode_config_path }}"
+    content: "{{ arch_opencode_existing_config | combine(arch_opencode_managed_config, recursive=true) | to_nice_json }}\n"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_configure_ollama

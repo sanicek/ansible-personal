@@ -1,0 +1,25 @@
+- name: Check whether Google Chrome is installed
+  ansible.builtin.command: "pacman -Q {{ arch_google_chrome_aur_package }}"
+  register: arch_google_chrome_package
+  changed_when: false
+  failed_when: false
+
+- name: Check available AUR updates
+  ansible.builtin.command: "{{ arch_aur_helper }} -Qua"
+  register: arch_google_chrome_aur_updates
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Install or update Google Chrome from AUR
+  ansible.builtin.command: "{{ arch_aur_helper }} -S --needed --noconfirm {{ arch_google_chrome_aur_package }}"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  when: >
+    arch_google_chrome_package.rc != 0
+    or arch_google_chrome_aur_updates.stdout is search('(^|\n)' ~ arch_google_chrome_aur_package ~ '\s')

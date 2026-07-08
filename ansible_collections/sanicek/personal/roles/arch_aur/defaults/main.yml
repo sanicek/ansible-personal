@@ -1,0 +1,4 @@
+arch_aur_helper: paru
+arch_aur_helper_package: paru
+arch_aur_helper_repo: "https://aur.archlinux.org/{{ arch_aur_helper_package }}.git"
+arch_aur_build_dir: "{{ user_home }}/.cache/aur"

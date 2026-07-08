@@ -1,0 +1,15 @@
+galaxy_info:
+  author: sanicek
+  description: Arch Linux Kitty terminal setup.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - terminal
+    - kitty
+dependencies: []
