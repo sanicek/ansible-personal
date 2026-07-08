@@ -1,0 +1,29 @@
+- name: Gather distribution facts when needed
+  ansible.builtin.setup:
+    gather_subset:
+      - distribution
+  when: "'distribution' not in ansible_facts"
+
+- name: Require Arch Linux or compatible derivative
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["distribution"] in arch_sshd_supported_distributions
+    fail_msg: "This role supports Arch Linux compatible systems only. Detected: {{ ansible_facts['distribution'] | default('unknown') }}."
+
+- name: Install OpenSSH
+  community.general.pacman:
+    name: "{{ arch_sshd_package }}"
+    state: present
+
+- name: Configure SSH firewall rules
+  ansible.builtin.include_role:
+    name: sanicek.server.ufw
+  vars:
+    server_ufw_rules: "{{ arch_sshd_firewall_rules }}"
+  when: arch_sshd_manage_firewall
+
+- name: Ensure SSH service is enabled and started
+  ansible.builtin.systemd_service:
+    name: "{{ arch_sshd_service }}"
+    enabled: true
+    state: started

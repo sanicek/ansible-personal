@@ -1,0 +1,22 @@
+- name: Install UFW
+  community.general.pacman:
+    name: ufw
+    state: present
+
+- name: Configure UFW rules
+  community.general.ufw:
+    rule: "{{ item.rule | default('allow') }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto | default('tcp') }}"
+    from_ip: "{{ item.from_ip | default('any') }}"
+    comment: "{{ item.comment | default(omit) }}"
+  loop: "{{ server_ufw_rules }}"
+
+- name: Configure UFW logging
+  community.general.ufw:
+    logging: "{{ server_ufw_logging }}"
+  when: server_ufw_logging | length > 0
+
+- name: Set UFW state
+  community.general.ufw:
+    state: "{{ server_ufw_state }}"

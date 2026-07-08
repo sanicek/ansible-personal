@@ -10,7 +10,7 @@ For first-run Arch Linux setup, use the repository-level `scripts/bootstrap.sh` 
 
 ## Local Variables
 
-Committed local defaults live in `inventories/local/group_vars/all.yml`. Private localhost overrides should be copied from `inventories/local/host_vars/localhost.yml.example` to the gitignored `inventories/local/host_vars/localhost.yml`.
+Committed local defaults live in the repository-level `inventories/local/group_vars/all.yml`. Private localhost overrides should be copied from `inventories/local/host_vars/localhost.yml.example` to the gitignored `inventories/local/host_vars/localhost.yml`.
 
 ## Playbooks
 

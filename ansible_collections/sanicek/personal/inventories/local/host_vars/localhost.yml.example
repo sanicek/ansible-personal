@@ -1,5 +1,0 @@
-# Copy this file to localhost.yml for private local overrides.
-# host_vars/localhost.yml is gitignored and overrides group_vars/all.yml.
-
-# Example:
-# personal_some_setting: value

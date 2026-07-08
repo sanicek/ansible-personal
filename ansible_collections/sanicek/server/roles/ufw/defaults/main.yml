@@ -1,0 +1,3 @@
+server_ufw_state: enabled
+server_ufw_logging: "on"
+server_ufw_rules: []

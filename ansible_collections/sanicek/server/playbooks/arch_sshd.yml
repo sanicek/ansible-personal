@@ -1,0 +1,5 @@
+- name: Install Arch SSH server
+  hosts: local
+  become: true
+  roles:
+    - sanicek.server.arch_sshd

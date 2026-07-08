@@ -2,10 +2,11 @@
 
 Personal configuration-as-code using Ansible.
 
-This repository is organized as a local Ansible collection:
+This repository is organized as local Ansible collections:
 
 ```text
 ansible_collections/sanicek/personal
+ansible_collections/sanicek/server
 ```
 
 Current content targets Fedora and Arch Linux. Platform support is organized through separate platform-specific roles.
@@ -25,14 +26,14 @@ The username defaults to `cac`. The script installs `sudo`, `git`, and `ansible`
 This repository targets localhost. Shared committed defaults live in:
 
 ```text
-ansible_collections/sanicek/personal/inventories/local/group_vars/all.yml
+inventories/local/group_vars/all.yml
 ```
 
 Private local overrides should live in a gitignored host vars file:
 
 ```bash
-cp ansible_collections/sanicek/personal/inventories/local/host_vars/localhost.yml.example \
-  ansible_collections/sanicek/personal/inventories/local/host_vars/localhost.yml
+cp inventories/local/host_vars/localhost.yml.example \
+  inventories/local/host_vars/localhost.yml
 ```
 
 `host_vars/localhost.yml` overrides `group_vars/all.yml`, making it the local equivalent of a private tfvars file.
@@ -51,6 +52,8 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.ym
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
+ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml
+ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 ```
 
 ## Validation
@@ -62,5 +65,8 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.ym
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --syntax-check
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
+ansible-galaxy collection build ansible_collections/sanicek/server --force
 ```
