@@ -1,0 +1,119 @@
+- name: Gather architecture facts when needed
+  ansible.builtin.setup:
+    gather_subset:
+      - hardware
+  when: ansible_facts["architecture"] is not defined
+
+- name: Require supported lazyskills architecture
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["architecture"] in ['x86_64', 'amd64', 'aarch64', 'arm64']
+    fail_msg: "lazyskills supports x86_64/amd64 and arm64/aarch64 only. Detected: {{ ansible_facts['architecture'] | default('unknown') }}."
+
+- name: Resolve lazyskills release architecture
+  ansible.builtin.set_fact:
+    arch_lazyskills_release_arch: "{{ 'arm64' if ansible_facts['architecture'] in ['aarch64', 'arm64'] else 'x86_64' }}"
+
+- name: Get latest lazyskills release metadata
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ arch_lazyskills_github_repo }}/releases/latest"
+    return_content: true
+    headers:
+      Accept: application/vnd.github+json
+  register: arch_lazyskills_latest_release
+  changed_when: false
+  when: arch_lazyskills_version == 'latest'
+
+- name: Resolve lazyskills release version
+  ansible.builtin.set_fact:
+    arch_lazyskills_resolved_version: >-
+      {{ arch_lazyskills_latest_release.json.tag_name
+         if arch_lazyskills_version == 'latest'
+         else (arch_lazyskills_version
+               if arch_lazyskills_version is match('^v')
+               else 'v' ~ arch_lazyskills_version) }}
+
+- name: Build lazyskills release artifact facts
+  ansible.builtin.set_fact:
+    arch_lazyskills_plain_version: "{{ arch_lazyskills_resolved_version | regex_replace('^v', '') }}"
+    arch_lazyskills_archive: "lazyskills_Linux_{{ arch_lazyskills_release_arch }}.tar.gz"
+    arch_lazyskills_release_base_url: "https://github.com/{{ arch_lazyskills_github_repo }}/releases/download/{{ arch_lazyskills_resolved_version }}"
+
+- name: Check installed lazyskills version
+  ansible.builtin.command: "{{ arch_lazyskills_install_dir }}/lazyskills version"
+  register: arch_lazyskills_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Ensure lazyskills install directory exists
+  ansible.builtin.file:
+    path: "{{ arch_lazyskills_install_dir }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Install or update lazyskills from GitHub release
+  when: >
+    arch_lazyskills_installed_version.rc != 0
+    or arch_lazyskills_installed_version.stdout is not search(arch_lazyskills_plain_version | regex_escape)
+  block:
+    - name: Create lazyskills download directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: lazyskills
+      register: arch_lazyskills_temp_dir
+
+    - name: Download lazyskills checksums
+      ansible.builtin.uri:
+        url: "{{ arch_lazyskills_release_base_url }}/checksums.txt"
+        return_content: true
+      register: arch_lazyskills_checksums
+      changed_when: false
+
+    - name: Find lazyskills archive checksum line
+      ansible.builtin.set_fact:
+        arch_lazyskills_checksum_line: >-
+          {{ arch_lazyskills_checksums.content.splitlines()
+             | select('contains', arch_lazyskills_archive)
+             | list
+             | first
+             | default('') }}
+
+    - name: Resolve lazyskills archive checksum
+      ansible.builtin.set_fact:
+        arch_lazyskills_checksum: "{{ arch_lazyskills_checksum_line.split() | first | default('') }}"
+
+    - name: Require lazyskills archive checksum
+      ansible.builtin.assert:
+        that:
+          - arch_lazyskills_checksum | length == 64
+        fail_msg: "Could not find checksum for {{ arch_lazyskills_archive }} in {{ arch_lazyskills_release_base_url }}/checksums.txt."
+
+    - name: Download verified lazyskills archive
+      ansible.builtin.get_url:
+        url: "{{ arch_lazyskills_release_base_url }}/{{ arch_lazyskills_archive }}"
+        dest: "{{ arch_lazyskills_temp_dir.path }}/{{ arch_lazyskills_archive }}"
+        checksum: "sha256:{{ arch_lazyskills_checksum }}"
+        mode: "0644"
+
+    - name: Extract lazyskills archive
+      ansible.builtin.unarchive:
+        src: "{{ arch_lazyskills_temp_dir.path }}/{{ arch_lazyskills_archive }}"
+        dest: "{{ arch_lazyskills_temp_dir.path }}"
+        remote_src: true
+
+    - name: Install lazyskills binary
+      ansible.builtin.copy:
+        src: "{{ arch_lazyskills_temp_dir.path }}/lazyskills"
+        dest: "{{ arch_lazyskills_install_dir }}/lazyskills"
+        remote_src: true
+        mode: "0755"
+        owner: root
+        group: root
+  always:
+    - name: Remove lazyskills download directory
+      ansible.builtin.file:
+        path: "{{ arch_lazyskills_temp_dir.path }}"
+        state: absent
+      when: arch_lazyskills_temp_dir.path is defined
