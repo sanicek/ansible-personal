@@ -64,6 +64,13 @@ validate_arch_cloud() {
   run_molecule_scenarios arch_cloud
 }
 
+validate_arch_k8s() {
+  install_dependencies
+  syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
+  build_personal_collection
+  run_molecule_scenarios arch_k8s
+}
+
 validate_full() {
   local playbooks=(
     ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml
@@ -85,11 +92,11 @@ validate_full() {
   install_dependencies
   syntax_check_playbooks "${playbooks[@]}"
   build_all_collections
-  run_molecule_scenarios arch_shell arch_terminal arch_cloud
+  run_molecule_scenarios arch_shell arch_terminal arch_cloud arch_k8s
 }
 
 usage() {
-  printf 'Usage: %s [full|arch_shell|arch_terminal|arch_cloud]\n' "${0##*/}" >&2
+  printf 'Usage: %s [full|arch_shell|arch_terminal|arch_cloud|arch_k8s]\n' "${0##*/}" >&2
 }
 
 target="${1:-full}"
@@ -106,6 +113,9 @@ case "$target" in
     ;;
   arch_cloud)
     validate_arch_cloud
+    ;;
+  arch_k8s)
+    validate_arch_k8s
     ;;
   -h|--help|help)
     usage

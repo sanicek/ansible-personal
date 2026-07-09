@@ -89,6 +89,7 @@ Focused targets are available when changing one playbook or role family:
 scripts/validate.sh arch_shell
 scripts/validate.sh arch_terminal
 scripts/validate.sh arch_cloud
+scripts/validate.sh arch_k8s
 scripts/validate.sh full
 ```
 
@@ -109,4 +110,5 @@ ansible-galaxy collection build ansible_collections/sanicek/server --force
 molecule test -s arch_shell
 molecule test -s arch_terminal
 molecule test -s arch_cloud
+molecule test -s arch_k8s
 ```
