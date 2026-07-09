@@ -1,0 +1,27 @@
+- name: Verify Arch cloud CLI installation
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check cloud CLI packages
+      ansible.builtin.command: pacman -Q terraform aws-cli-v2 azure-cli vault
+      register: arch_cloud_packages
+      changed_when: false
+
+    - name: Check cloud CLI binaries
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/bin/terraform
+        - /usr/bin/aws
+        - /usr/bin/az
+        - /usr/bin/vault
+      register: arch_cloud_binaries
+
+    - name: Assert expected Arch cloud CLIs are installed
+      ansible.builtin.assert:
+        that:
+          - "'terraform' in arch_cloud_packages.stdout"
+          - "'aws-cli-v2' in arch_cloud_packages.stdout"
+          - "'azure-cli' in arch_cloud_packages.stdout"
+          - "'vault' in arch_cloud_packages.stdout"
+          - arch_cloud_binaries.results | map(attribute='stat.exists') | min

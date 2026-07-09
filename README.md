@@ -81,7 +81,16 @@ Run the full validation entrypoint from the repository root:
 scripts/validate.sh
 ```
 
-The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenarios for `arch_shell` and `arch_terminal`.
+The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds local collections, and runs Podman-backed Molecule scenarios with idempotence checks. Without arguments it runs full validation.
+
+Focused targets are available when changing one playbook or role family:
+
+```bash
+scripts/validate.sh arch_shell
+scripts/validate.sh arch_terminal
+scripts/validate.sh arch_cloud
+scripts/validate.sh full
+```
 
 Focused validation commands are still useful while developing:
 
@@ -99,4 +108,5 @@ ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ansible-galaxy collection build ansible_collections/sanicek/server --force
 molecule test -s arch_shell
 molecule test -s arch_terminal
+molecule test -s arch_cloud
 ```
