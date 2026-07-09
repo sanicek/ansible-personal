@@ -1,0 +1,39 @@
+- name: Verify Fedora shell configuration
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check user Bash configuration
+      ansible.builtin.slurp:
+        path: /home/molecule/.bashrc
+      register: fedora_shell_user_bashrc
+
+    - name: Check system Bash configuration
+      ansible.builtin.slurp:
+        path: /etc/bashrc
+      register: fedora_shell_system_bashrc
+
+    - name: Check fzf profile script
+      ansible.builtin.stat:
+        path: /etc/profile.d/fzf.sh
+      register: fedora_shell_fzf_profile
+
+    - name: Check fzf checkout
+      ansible.builtin.stat:
+        path: /usr/local/share/fzf/shell/key-bindings.bash
+      register: fedora_shell_fzf_checkout
+
+    - name: Check bash-git-prompt checkout
+      ansible.builtin.stat:
+        path: /usr/local/share/bash-git-prompt/gitprompt.sh
+      register: fedora_shell_git_prompt
+
+    - name: Assert expected Fedora shell files exist
+      ansible.builtin.assert:
+        that:
+          - fedora_shell_fzf_profile.stat.exists
+          - fedora_shell_fzf_checkout.stat.exists
+          - fedora_shell_git_prompt.stat.exists
+          - "'ANSIBLE MANAGED BLOCK bashrc' in (fedora_shell_user_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bashrc' in (fedora_shell_system_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (fedora_shell_user_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (fedora_shell_system_bashrc.content | b64decode)"

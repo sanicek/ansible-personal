@@ -59,6 +59,31 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 
 ## Validation
 
+Install Podman and local Python tooling prerequisites with the platform-specific Molecule setup playbook:
+
+```bash
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml
+```
+
+Install Molecule into a repository-local virtual environment:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+Run the full validation entrypoint from the repository root:
+
+```bash
+scripts/validate.sh
+```
+
+The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenarios for `arch_shell` and `fedora_shell`.
+
+Focused validation commands are still useful while developing:
+
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gui_apps.yml --syntax-check
@@ -71,4 +96,6 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml --
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --syntax-check
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ansible-galaxy collection build ansible_collections/sanicek/server --force
+molecule test -s arch_shell
+molecule test -s fedora_shell
 ```

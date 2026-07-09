@@ -21,8 +21,11 @@
 - Fresh Arch bootstrap only: `sudo bash scripts/bootstrap.sh [username]` (`username` defaults to `cac`; installs `sudo`, `git`, `ansible`, creates the user, and enables passwordless sudo).
 - Run one playbook: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml`.
 - Focused syntax check: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check`.
+- Install Podman-backed Molecule prerequisites with `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml` or `ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
+- Install Python validation tooling in a local virtualenv: `python -m venv .venv`, `. .venv/bin/activate`, then `pip install -r requirements-dev.txt`.
+- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell` plus `molecule test -s fedora_shell`.
 - Build collections after metadata or role changes: `ansible-galaxy collection build ansible_collections/sanicek/personal --force` and `ansible-galaxy collection build ansible_collections/sanicek/server --force`.
-- There is no repo-local CI, Makefile, pre-commit, ansible-lint, Molecule, or test harness currently; use relevant playbook syntax checks plus collection build as verification.
+- There is no repo-local CI, Makefile, pre-commit, ansible-lint, or Molecule idempotence gate currently; use relevant playbook syntax checks, collection build, and available Molecule scenarios as verification.
 
 ## Playbook Map
 - Fedora workstation: `fedora_bootstrap`, common packages, power, GUI apps, kitty, fonts, bash-git-prompt, shell, fzf.

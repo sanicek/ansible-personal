@@ -1,0 +1,7 @@
+arch_molecule_packages:
+  - git
+  - podman
+  - python
+  - python-pip
+  - python-virtualenv
+  - shadow

@@ -1,0 +1,5 @@
+- name: Install Molecule validation prerequisites
+  community.general.pacman:
+    name: "{{ arch_molecule_packages }}"
+    state: present
+    update_cache: true

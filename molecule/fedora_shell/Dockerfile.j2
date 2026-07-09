@@ -1,0 +1,11 @@
+# Molecule managed
+FROM {{ item.image }}
+
+RUN dnf -y update \
+    && dnf -y install bash git python3 sudo shadow-utils \
+    && dnf clean all
+
+RUN useradd -m -s /bin/bash molecule \
+    && mkdir -p /etc/sudoers.d \
+    && printf 'molecule ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/molecule \
+    && chmod 0440 /etc/sudoers.d/molecule

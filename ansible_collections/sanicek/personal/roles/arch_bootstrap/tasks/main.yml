@@ -12,8 +12,8 @@
 
 - name: Set current user facts
   ansible.builtin.set_fact:
-    user_home: "{{ lookup('ansible.builtin.env', 'HOME') }}"
-    user_name: "{{ lookup('ansible.builtin.env', 'USER') }}"
+    user_home: "{{ bootstrap_user_home | default(lookup('ansible.builtin.env', 'HOME')) }}"
+    user_name: "{{ bootstrap_user_name | default(lookup('ansible.builtin.env', 'USER')) }}"
     package_manager: pacman
 
 - name: Ensure Bash login shell setup
