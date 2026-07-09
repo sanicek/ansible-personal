@@ -15,15 +15,53 @@
     name: "{{ arch_sshd_package }}"
     state: present
 
-- name: Configure SSH firewall rules
-  ansible.builtin.include_role:
-    name: sanicek.server.ufw
-  vars:
-    server_ufw_rules: "{{ arch_sshd_firewall_rules }}"
-  when: arch_sshd_manage_firewall
+- name: Ensure OpenSSH host keys exist
+  ansible.builtin.command: ssh-keygen -A
+  changed_when: false
+
+- name: Create sshd_config.d drop-in directory
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy hardened sshd config drop-in
+  ansible.builtin.template:
+    src: hardened.conf.j2
+    dest: /etc/ssh/sshd_config.d/hardened.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: arch_sshd_config_dropin_enable | bool
+  notify: Restart sshd
+
+- name: Remove hardened sshd config drop-in
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/hardened.conf
+    state: absent
+  when: not (arch_sshd_config_dropin_enable | bool)
+  notify: Restart sshd
+
+- name: Validate sshd configuration before reload
+  ansible.builtin.command: sshd -t
+  register: arch_sshd_config_validation
+  failed_when: arch_sshd_config_validation.rc != 0
+  changed_when: false
 
 - name: Ensure SSH service is enabled and started
   ansible.builtin.systemd_service:
     name: "{{ arch_sshd_service }}"
     enabled: true
     state: started
+
+- name: Apply SSH config changes before opening firewall
+  ansible.builtin.meta: flush_handlers
+
+- name: Configure SSH firewall rules
+  ansible.builtin.include_role:
+    name: sanicek.server.ufw
+  vars:
+    server_ufw_rules: "{{ arch_sshd_firewall_rules }}"
+  when: arch_sshd_manage_firewall

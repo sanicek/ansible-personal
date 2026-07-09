@@ -1,0 +1,37 @@
+{% macro ssh_value(value) -%}
+{{ 'yes' if value is sameas true else 'no' if value is sameas false else value }}
+{%- endmacro %}
+# Hardened sshd config drop-in (OpenSSH 9.4+ on Arch)
+# This file overrides defaults from /etc/ssh/sshd_config via Include directive.
+# Variables are controlled by arch_sshd_* inventory vars.
+
+# Authentication
+PermitRootLogin {{ ssh_value(arch_sshd_permit_root_login) }}
+PasswordAuthentication {{ ssh_value(arch_sshd_password_auth) }}
+ChallengeResponseAuthentication {{ ssh_value(arch_sshd_challenge_response_auth) }}
+KbdInteractiveAuthentication {{ ssh_value(arch_sshd_kbd_interactive_auth) }}
+PubkeyAuthentication {{ ssh_value(arch_sshd_pubkey_auth) }}
+
+# Network and forwarding
+X11Forwarding {{ ssh_value(arch_sshd_x11_forwarding) }}
+AllowTcpForwarding {{ ssh_value(arch_sshd_allow_tcp_forwarding) }}
+GatewayPorts {{ ssh_value(arch_sshd_gateway_ports) }}
+PermitTunnel {{ ssh_value(arch_sshd_permit_tunnel) }}
+
+# Hardening limits
+MaxAuthTries {{ arch_sshd_max_auth_tries }}
+LoginGraceTime {{ arch_sshd_login_grace_time }}
+MaxSessions {{ arch_sshd_max_sessions }}
+MaxStartups {{ arch_sshd_max_startups }}
+
+# Idle keepalive
+ClientAliveInterval {{ arch_sshd_client_alive_interval }}
+ClientAliveCountMax {{ arch_sshd_client_alive_count_max }}
+
+# Disable DNS lookups
+UseDNS {{ ssh_value(arch_sshd_use_dns) }}
+
+# Cryptographic policies (OpenSSH 9.0+)
+KexAlgorithms {{ arch_sshd_kex_algorithms | join(',') }}
+MACs {{ arch_sshd_macs | join(',') }}
+Ciphers {{ arch_sshd_ciphers | join(',') }}
