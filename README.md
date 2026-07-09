@@ -90,6 +90,7 @@ scripts/validate.sh arch_shell
 scripts/validate.sh arch_terminal
 scripts/validate.sh arch_cloud
 scripts/validate.sh arch_k8s
+scripts/validate.sh arch_opencode
 scripts/validate.sh full
 ```
 
@@ -111,4 +112,5 @@ molecule test -s arch_shell
 molecule test -s arch_terminal
 molecule test -s arch_cloud
 molecule test -s arch_k8s
+molecule test -s arch_opencode
 ```
