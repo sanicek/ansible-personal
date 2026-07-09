@@ -9,7 +9,7 @@ ansible_collections/sanicek/personal
 ansible_collections/sanicek/server
 ```
 
-Current content targets Fedora and Arch Linux. Platform support is organized through separate platform-specific roles.
+Current content targets Arch Linux and Fedora. Arch Linux is the active target platform for new features, validation, and role improvements. Fedora content is kept for basic maintenance only; avoid adding new Fedora playbooks, Molecule scenarios, or improvement work unless explicitly requested.
 
 ## Bootstrap
 
@@ -59,12 +59,13 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 
 ## Validation
 
-Install Podman and local Python tooling prerequisites with the platform-specific Molecule setup playbook:
+Install Podman and local Python tooling prerequisites with the Arch Molecule setup playbook:
 
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
-ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml
 ```
+
+For explicit Fedora maintenance work only, use `ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
 
 Install Molecule into a repository-local virtual environment:
 
@@ -80,7 +81,7 @@ Run the full validation entrypoint from the repository root:
 scripts/validate.sh
 ```
 
-The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenarios for `arch_shell` and `fedora_shell`.
+The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenario for `arch_shell`.
 
 Focused validation commands are still useful while developing:
 
@@ -97,5 +98,4 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --sy
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ansible-galaxy collection build ansible_collections/sanicek/server --force
 molecule test -s arch_shell
-molecule test -s fedora_shell
 ```

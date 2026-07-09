@@ -38,4 +38,3 @@ if ! command -v molecule >/dev/null 2>&1; then
 fi
 
 molecule test -s arch_shell
-molecule test -s fedora_shell

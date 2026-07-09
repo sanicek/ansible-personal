@@ -1,14 +1,16 @@
 - name: Ensure .bash_profile exists for root
-  ansible.builtin.file:
-    path: /root/.bash_profile
-    state: touch
+  ansible.builtin.copy:
+    dest: /root/.bash_profile
+    content: ""
+    force: false
     mode: "0644"
   become: true
 
 - name: Ensure .bashrc exists for root
-  ansible.builtin.file:
-    path: /root/.bashrc
-    state: touch
+  ansible.builtin.copy:
+    dest: /root/.bashrc
+    content: ""
+    force: false
     mode: "0644"
   become: true
 
@@ -29,9 +31,10 @@
   become: true
 
 - name: Ensure .bash_profile exists for current user
-  ansible.builtin.file:
-    path: "{{ user_home }}/.bash_profile"
-    state: touch
+  ansible.builtin.copy:
+    dest: "{{ user_home }}/.bash_profile"
+    content: ""
+    force: false
     mode: "0644"
   become: true
   become_user: "{{ user_name }}"
@@ -39,9 +42,10 @@
     HOME: "{{ user_home }}"
 
 - name: Ensure .bashrc exists for current user
-  ansible.builtin.file:
-    path: "{{ user_home }}/.bashrc"
-    state: touch
+  ansible.builtin.copy:
+    dest: "{{ user_home }}/.bashrc"
+    content: ""
+    force: false
     mode: "0644"
   become: true
   become_user: "{{ user_name }}"

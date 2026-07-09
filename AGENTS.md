@@ -15,15 +15,17 @@
 - Bootstrap roles set `user_name`, `user_home`, and `package_manager` from the caller's environment. User-scoped tasks depend on those facts, so keep bootstrap before dependent roles in playbooks.
 - Arch roles use `community.general.pacman`; Fedora roles use `ansible.builtin.dnf`. Both collections declare `community.general >=8.0.0` and require Ansible `>=2.16.0`.
 - Arch support currently accepts `Archlinux` and `CachyOS`; Fedora bootstrap asserts exactly `Fedora`.
+- Arch is the active target platform for new features, validation, and role improvements. Fedora is sunset/maintenance-only: keep existing playbooks basically functional, but do not add new Fedora playbooks, Molecule scenarios, roles, or improvement work unless explicitly requested.
 - Server roles manage their own firewall via `sanicek.server.ufw`; `arch_ollama` only opens UFW when `arch_ollama_host` is not localhost-only.
 
 ## Commands
 - Fresh Arch bootstrap only: `sudo bash scripts/bootstrap.sh [username]` (`username` defaults to `cac`; installs `sudo`, `git`, `ansible`, creates the user, and enables passwordless sudo).
 - Run one playbook: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml`.
 - Focused syntax check: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check`.
-- Install Podman-backed Molecule prerequisites with `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml` or `ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
+- Install Podman-backed Molecule prerequisites for active validation with `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml`; use `fedora_molecule.yml` only for explicit Fedora maintenance work.
 - Install Python validation tooling in a local virtualenv: `python -m venv .venv`, `. .venv/bin/activate`, then `pip install -r requirements-dev.txt`.
-- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell` plus `molecule test -s fedora_shell`.
+- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell`.
+- Molecule may emit non-fatal warnings about missing `molecule/default/molecule.yml` and missing role `requirements.yml`; these are expected with this repo's explicit scenarios and collection-only dependency setup. Do not mention them in user-facing validation summaries when `scripts/validate.sh` or `molecule test -s arch_shell` exits successfully.
 - Build collections after metadata or role changes: `ansible-galaxy collection build ansible_collections/sanicek/personal --force` and `ansible-galaxy collection build ansible_collections/sanicek/server --force`.
 - There is no repo-local CI, Makefile, pre-commit, ansible-lint, or Molecule idempotence gate currently; use relevant playbook syntax checks, collection build, and available Molecule scenarios as verification.
 
