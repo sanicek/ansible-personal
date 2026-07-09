@@ -2,7 +2,7 @@
 
 ## Repo Shape
 - This is a local Ansible collection workspace, not a packaged app. Collections live under `ansible_collections/sanicek/personal` and `ansible_collections/sanicek/server`.
-- Run Ansible commands from the repo root so `ansible.cfg` applies `inventory = ./inventories/local/hosts` and `collections_path = .`.
+- Run Ansible commands from the repo root so `ansible.cfg` applies `inventory = ./inventories/local/hosts` and `collections_path = ./.ansible/collections:.`.
 - The only inventory target is local: `localhost ansible_connection=local` in `inventories/local/hosts`.
 
 ## Variables And Secrets
@@ -24,8 +24,8 @@
 - Focused syntax check: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check`.
 - Install Podman-backed Molecule prerequisites for active validation with `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml`; use `fedora_molecule.yml` only for explicit Fedora maintenance work.
 - Install Python validation tooling in a local virtualenv: `python -m venv .venv`, `. .venv/bin/activate`, then `pip install -r requirements-dev.txt`.
-- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell`.
-- Molecule may emit non-fatal warnings about missing `molecule/default/molecule.yml` and missing role `requirements.yml`; these are expected with this repo's explicit scenarios and collection-only dependency setup. Do not mention them in user-facing validation summaries when `scripts/validate.sh` or `molecule test -s arch_shell` exits successfully.
+- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell` and `molecule test -s arch_terminal`.
+- Molecule may emit non-fatal warnings about missing `molecule/default/molecule.yml` and missing role `requirements.yml`; these are expected with this repo's explicit scenarios and collection-only dependency setup. Do not mention them in user-facing validation summaries when `scripts/validate.sh`, `molecule test -s arch_shell`, or `molecule test -s arch_terminal` exits successfully.
 - Build collections after metadata or role changes: `ansible-galaxy collection build ansible_collections/sanicek/personal --force` and `ansible-galaxy collection build ansible_collections/sanicek/server --force`.
 - There is no repo-local CI, Makefile, pre-commit, ansible-lint, or Molecule idempotence gate currently; use relevant playbook syntax checks, collection build, and available Molecule scenarios as verification.
 

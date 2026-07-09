@@ -1,0 +1,2 @@
+- name: Converge Arch terminal playbook
+  ansible.builtin.import_playbook: ../../ansible_collections/sanicek/personal/playbooks/arch_terminal.yml

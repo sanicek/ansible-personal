@@ -81,7 +81,7 @@ Run the full validation entrypoint from the repository root:
 scripts/validate.sh
 ```
 
-The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenario for `arch_shell`.
+The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds both local collections, and runs the Podman-backed Molecule scenarios for `arch_shell` and `arch_terminal`.
 
 Focused validation commands are still useful while developing:
 
@@ -98,4 +98,5 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --sy
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ansible-galaxy collection build ansible_collections/sanicek/server --force
 molecule test -s arch_shell
+molecule test -s arch_terminal
 ```
