@@ -3,6 +3,7 @@ arch_ollama_supported_distributions:
   - CachyOS
 
 arch_ollama_backend: rocm
+arch_ollama_keep_alive: "1h"
 arch_ollama_host: "127.0.0.1:11434"
 arch_ollama_context_length: ""
 arch_ollama_models:

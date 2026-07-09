@@ -1,5 +1,6 @@
 [Service]
 Environment="OLLAMA_HOST={{ arch_ollama_host }}"
+Environment="OLLAMA_KEEP_ALIVE={{ arch_ollama_keep_alive }}"
 {% if arch_ollama_context_length | string | length > 0 %}
 Environment="OLLAMA_CONTEXT_LENGTH={{ arch_ollama_context_length }}"
 {% endif %}

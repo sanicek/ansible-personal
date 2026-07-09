@@ -20,6 +20,7 @@
 # arch_ollama_host: "127.0.0.1:11434"
 # arch_ollama_host: "0.0.0.0:11434"
 # arch_ollama_context_length: "65536"
+# arch_ollama_keep_alive: "1h"
 # arch_ollama_models:
 #   - qwen3.6:35b
 # arch_ollama_firewall_rules:
