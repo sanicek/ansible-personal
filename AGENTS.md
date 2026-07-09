@@ -2,7 +2,7 @@
 
 ## Repo Shape
 - This is a local Ansible collection workspace, not a packaged app. Collections live under `ansible_collections/sanicek/personal` and `ansible_collections/sanicek/server`.
-- Run Ansible commands from the repo root so `ansible.cfg` applies `inventory = ./inventories/local/hosts` and `collections_path = .`.
+- Run Ansible commands from the repo root so `ansible.cfg` applies `inventory = ./inventories/local/hosts` and `collections_path = ./.ansible/collections:.`.
 - The only inventory target is local: `localhost ansible_connection=local` in `inventories/local/hosts`.
 
 ## Variables And Secrets
@@ -15,14 +15,20 @@
 - Bootstrap roles set `user_name`, `user_home`, and `package_manager` from the caller's environment. User-scoped tasks depend on those facts, so keep bootstrap before dependent roles in playbooks.
 - Arch roles use `community.general.pacman`; Fedora roles use `ansible.builtin.dnf`. Both collections declare `community.general >=8.0.0` and require Ansible `>=2.16.0`.
 - Arch support currently accepts `Archlinux` and `CachyOS`; Fedora bootstrap asserts exactly `Fedora`.
+- Arch is the active target platform for new features, validation, and role improvements. Fedora is sunset/maintenance-only: keep existing playbooks basically functional, but do not add new Fedora playbooks, Molecule scenarios, roles, or improvement work unless explicitly requested.
 - Server roles manage their own firewall via `sanicek.server.ufw`; `arch_ollama` only opens UFW when `arch_ollama_host` is not localhost-only.
 
 ## Commands
 - Fresh Arch bootstrap only: `sudo bash scripts/bootstrap.sh [username]` (`username` defaults to `cac`; installs `sudo`, `git`, `ansible`, creates the user, and enables passwordless sudo).
 - Run one playbook: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml`.
 - Focused syntax check: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check`.
+- Install Podman-backed Molecule prerequisites for active validation with `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml`; use `fedora_molecule.yml` only for explicit Fedora maintenance work.
+- Install Python validation tooling in a local virtualenv: `python -m venv .venv`, `. .venv/bin/activate`, then `pip install -r requirements-dev.txt`.
+- Full validation entrypoint: `scripts/validate.sh`; it installs external collections into gitignored `.ansible/collections`, runs syntax checks, builds both collections, and runs `molecule test -s arch_shell`, `molecule test -s arch_terminal`, `molecule test -s arch_cloud`, `molecule test -s arch_k8s`, and `molecule test -s arch_opencode`.
+- Focused validation targets: `scripts/validate.sh arch_shell`, `scripts/validate.sh arch_terminal`, `scripts/validate.sh arch_cloud`, `scripts/validate.sh arch_k8s`, and `scripts/validate.sh arch_opencode`; use these when changes are limited to one role family.
+- Molecule may emit non-fatal warnings about missing `molecule/default/molecule.yml` and missing role `requirements.yml`; these are expected with this repo's explicit scenarios and collection-only dependency setup. Do not mention them in user-facing validation summaries when `scripts/validate.sh`, `molecule test -s arch_shell`, `molecule test -s arch_terminal`, `molecule test -s arch_cloud`, `molecule test -s arch_k8s`, or `molecule test -s arch_opencode` exits successfully.
 - Build collections after metadata or role changes: `ansible-galaxy collection build ansible_collections/sanicek/personal --force` and `ansible-galaxy collection build ansible_collections/sanicek/server --force`.
-- There is no repo-local CI, Makefile, pre-commit, ansible-lint, Molecule, or test harness currently; use relevant playbook syntax checks plus collection build as verification.
+- There is no repo-local CI, Makefile, pre-commit, or ansible-lint currently; use relevant playbook syntax checks, collection build, and available Molecule scenarios as verification.
 
 ## Playbook Map
 - Fedora workstation: `fedora_bootstrap`, common packages, power, GUI apps, kitty, fonts, bash-git-prompt, shell, fzf.

@@ -1,0 +1,10 @@
+galaxy_info:
+  author: sanicek
+  description: Install Fedora prerequisites for Molecule validation.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+dependencies: []

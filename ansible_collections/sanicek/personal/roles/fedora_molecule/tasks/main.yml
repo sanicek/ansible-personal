@@ -1,0 +1,4 @@
+- name: Install Molecule validation prerequisites
+  ansible.builtin.dnf:
+    name: "{{ fedora_molecule_packages }}"
+    state: present

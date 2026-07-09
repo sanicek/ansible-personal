@@ -4,4 +4,3 @@ fedora_common_packages:
   - the_silver_searcher
   - ripgrep
   - jq
-  - gron

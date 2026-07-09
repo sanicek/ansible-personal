@@ -1,0 +1,32 @@
+- name: Verify Arch terminal configuration
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check Kitty binary
+      ansible.builtin.stat:
+        path: /usr/bin/kitty
+      register: arch_terminal_kitty_binary
+
+    - name: Check Kitty configuration
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/kitty/kitty.conf
+      register: arch_terminal_kitty_config
+
+    - name: Check Kitty launcher
+      ansible.builtin.slurp:
+        path: /home/molecule/.local/share/applications/kitty.desktop
+      register: arch_terminal_kitty_launcher
+
+    - name: Check Cascadia font resolution
+      ansible.builtin.command: fc-match "Cascadia Mono"
+      register: arch_terminal_cascadia_font
+      changed_when: false
+
+    - name: Assert expected Arch terminal files exist
+      ansible.builtin.assert:
+        that:
+          - arch_terminal_kitty_binary.stat.exists
+          - "'font_family      Cascadia Mono' in (arch_terminal_kitty_config.content | b64decode)"
+          - "'shell_integration disabled' in (arch_terminal_kitty_config.content | b64decode)"
+          - "'Exec=kitty --start-as=maximized' in (arch_terminal_kitty_launcher.content | b64decode)"
+          - "'CaskaydiaMono' in arch_terminal_cascadia_font.stdout or 'Cascadia' in arch_terminal_cascadia_font.stdout"

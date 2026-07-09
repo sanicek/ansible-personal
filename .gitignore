@@ -1,2 +1,7 @@
 *.tar.gz
 inventories/local/host_vars/localhost.yml
+.venv/
+.ansible/
+.molecule/
+__pycache__/
+*.py[cod]

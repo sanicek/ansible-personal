@@ -9,7 +9,7 @@ ansible_collections/sanicek/personal
 ansible_collections/sanicek/server
 ```
 
-Current content targets Fedora and Arch Linux. Platform support is organized through separate platform-specific roles.
+Current content targets Arch Linux and Fedora. Arch Linux is the active target platform for new features, validation, and role improvements. Fedora content is kept for basic maintenance only; avoid adding new Fedora playbooks, Molecule scenarios, or improvement work unless explicitly requested.
 
 ## Bootstrap
 
@@ -59,6 +59,43 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 
 ## Validation
 
+Install Podman and local Python tooling prerequisites with the Arch Molecule setup playbook:
+
+```bash
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
+```
+
+For explicit Fedora maintenance work only, use `ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
+
+Install Molecule into a repository-local virtual environment:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+Run the full validation entrypoint from the repository root:
+
+```bash
+scripts/validate.sh
+```
+
+The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds local collections, and runs Podman-backed Molecule scenarios with idempotence checks. Without arguments it runs full validation.
+
+Focused targets are available when changing one playbook or role family:
+
+```bash
+scripts/validate.sh arch_shell
+scripts/validate.sh arch_terminal
+scripts/validate.sh arch_cloud
+scripts/validate.sh arch_k8s
+scripts/validate.sh arch_opencode
+scripts/validate.sh full
+```
+
+Focused validation commands are still useful while developing:
+
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gui_apps.yml --syntax-check
@@ -71,4 +108,9 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml --
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --syntax-check
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
 ansible-galaxy collection build ansible_collections/sanicek/server --force
+molecule test -s arch_shell
+molecule test -s arch_terminal
+molecule test -s arch_cloud
+molecule test -s arch_k8s
+molecule test -s arch_opencode
 ```

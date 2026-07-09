@@ -1,0 +1,39 @@
+- name: Verify Arch shell configuration
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check user Bash configuration
+      ansible.builtin.slurp:
+        path: /home/molecule/.bashrc
+      register: arch_shell_user_bashrc
+
+    - name: Check system Bash configuration
+      ansible.builtin.slurp:
+        path: /etc/bash.bashrc
+      register: arch_shell_system_bashrc
+
+    - name: Check fzf profile script
+      ansible.builtin.stat:
+        path: /etc/profile.d/fzf.sh
+      register: arch_shell_fzf_profile
+
+    - name: Check bash-git-prompt checkout
+      ansible.builtin.stat:
+        path: /usr/local/share/bash-git-prompt/gitprompt.sh
+      register: arch_shell_git_prompt
+
+    - name: Check Yazi flavor configuration
+      ansible.builtin.stat:
+        path: /home/molecule/.config/yazi/theme.toml
+      register: arch_shell_yazi_theme
+
+    - name: Assert expected Arch shell files exist
+      ansible.builtin.assert:
+        that:
+          - arch_shell_fzf_profile.stat.exists
+          - arch_shell_git_prompt.stat.exists
+          - arch_shell_yazi_theme.stat.exists
+          - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_user_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_system_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_user_bashrc.content | b64decode)"
+          - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_system_bashrc.content | b64decode)"

@@ -1,0 +1,11 @@
+# Molecule managed
+FROM {{ item.image }}
+
+RUN pacman -Syu --noconfirm \
+    && pacman -S --noconfirm bash git python sudo shadow \
+    && pacman -Scc --noconfirm
+
+RUN useradd -m -s /bin/bash molecule \
+    && mkdir -p /etc/sudoers.d \
+    && printf 'molecule ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/molecule \
+    && chmod 0440 /etc/sudoers.d/molecule

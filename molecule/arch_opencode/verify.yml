@@ -1,0 +1,37 @@
+- name: Verify Arch opencode installation
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check opencode package
+      ansible.builtin.command: pacman -Q opencode
+      register: arch_opencode_packages
+      changed_when: false
+
+    - name: Check opencode binary
+      ansible.builtin.stat:
+        path: /usr/bin/opencode
+      register: arch_opencode_binary
+
+    - name: Check lazyskills binary
+      ansible.builtin.stat:
+        path: /usr/local/bin/lazyskills
+      register: arch_opencode_lazyskills_binary
+
+    - name: Check lazyskills version
+      ansible.builtin.command: /usr/local/bin/lazyskills version
+      register: arch_opencode_lazyskills_version
+      changed_when: false
+
+    - name: Check opencode config is not provisioned by default
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/opencode.jsonc
+      register: arch_opencode_config
+
+    - name: Assert expected Arch opencode installation
+      ansible.builtin.assert:
+        that:
+          - "'opencode' in arch_opencode_packages.stdout"
+          - arch_opencode_binary.stat.exists
+          - arch_opencode_lazyskills_binary.stat.exists
+          - arch_opencode_lazyskills_version.rc == 0
+          - not arch_opencode_config.stat.exists

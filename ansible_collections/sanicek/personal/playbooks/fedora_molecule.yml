@@ -1,0 +1,6 @@
+- name: Install Fedora Molecule test prerequisites
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.fedora_bootstrap
+    - sanicek.personal.fedora_molecule

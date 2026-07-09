@@ -1,0 +1,40 @@
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_PROJECT_DIRECTORY}/requirements.yml
+    collections-path: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections
+driver:
+  name: podman
+platforms:
+  - name: arch-cloud
+    dockerfile: Dockerfile.j2
+    image: docker.io/archlinux:latest
+    pre_build_image: false
+    command: /usr/bin/sleep infinity
+    groups:
+      - local
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections:${MOLECULE_PROJECT_DIRECTORY}
+  inventory:
+    group_vars:
+      local:
+        bootstrap_user_home: /home/molecule
+        bootstrap_user_name: molecule
+    host_vars:
+      arch-cloud:
+        ansible_become_method: sudo
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: molecule
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy
+verifier:
+  name: ansible

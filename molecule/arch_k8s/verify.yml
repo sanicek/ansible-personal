@@ -1,0 +1,28 @@
+- name: Verify Arch k8s CLI installation
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check k8s CLI packages
+      ansible.builtin.command: pacman -Q kubectl helm k9s kubectx
+      register: arch_k8s_packages
+      changed_when: false
+
+    - name: Check k8s CLI binaries
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/bin/kubectl
+        - /usr/bin/helm
+        - /usr/bin/k9s
+        - /usr/bin/kubectx
+        - /usr/bin/kubens
+      register: arch_k8s_binaries
+
+    - name: Assert expected Arch k8s CLIs are installed
+      ansible.builtin.assert:
+        that:
+          - "'kubectl' in arch_k8s_packages.stdout"
+          - "'helm' in arch_k8s_packages.stdout"
+          - "'k9s' in arch_k8s_packages.stdout"
+          - "'kubectx' in arch_k8s_packages.stdout"
+          - arch_k8s_binaries.results | map(attribute='stat.exists') | min
