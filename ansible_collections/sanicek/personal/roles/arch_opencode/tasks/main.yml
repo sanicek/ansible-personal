@@ -128,7 +128,22 @@
   ansible.builtin.set_fact:
     arch_opencode_managed_config: >-
       {{ arch_opencode_managed_config | combine(arch_opencode_ollama_provider_config, recursive=true) }}
-  when: arch_opencode_configure_ollama
+  when:
+    - arch_opencode_configure_ollama
+    - not arch_opencode_replace_ollama_models
+
+- name: Configure opencode Ollama provider with exact managed model map
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config | combine({
+        'provider': ((arch_opencode_managed_config.provider | default({}))
+          | combine({
+            arch_opencode_ollama_provider_id: arch_opencode_ollama_provider_config.provider[arch_opencode_ollama_provider_id]
+          }, recursive=false))
+      }, recursive=false) }}
+  when:
+    - arch_opencode_configure_ollama
+    - arch_opencode_replace_ollama_models
 
 - name: Configure opencode default model
   ansible.builtin.set_fact:

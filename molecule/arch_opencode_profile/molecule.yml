@@ -6,7 +6,14 @@ dependency:
 driver:
   name: podman
 platforms:
-  - name: arch-opencode-profile
+  - name: arch-opencode-profile-cloud
+    dockerfile: Dockerfile.j2
+    image: docker.io/archlinux:latest
+    pre_build_image: false
+    command: /usr/bin/sleep infinity
+    groups:
+      - local
+  - name: arch-opencode-profile-hybrid
     dockerfile: Dockerfile.j2
     image: docker.io/archlinux:latest
     pre_build_image: false
@@ -23,15 +30,22 @@ provisioner:
         bootstrap_user_home: /home/molecule
         bootstrap_user_name: molecule
     host_vars:
-      arch-opencode-profile:
+      arch-opencode-profile-cloud:
         ansible_become_method: sudo
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
+        arch_opencode_profile: cloud_openai
+      arch-opencode-profile-hybrid:
+        ansible_become_method: sudo
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: molecule
+        arch_opencode_profile: hybrid_qwen_go
 scenario:
   test_sequence:
     - dependency
     - destroy
     - create
+    - prepare
     - converge
     - idempotence
     - verify
