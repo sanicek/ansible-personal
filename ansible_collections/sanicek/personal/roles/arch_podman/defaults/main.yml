@@ -1,0 +1,7 @@
+arch_podman_packages:
+  - podman
+  - shadow
+
+arch_podman_configure_wsl: true
+arch_podman_containers_conf_path: "{{ user_home }}/.config/containers/containers.conf"
+arch_podman_wsl_buildah_isolation: chroot
