@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
   "agents": {
     "validator": {
-      "displayName": "validator",
       "model": "opencode-go/deepseek-v4-pro",
       "variant": "max",
       "skills": [],
