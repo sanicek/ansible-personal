@@ -84,6 +84,14 @@
     - arch_opencode_set_default_model
     - arch_opencode_model | length > 0
 
+- name: Configure opencode small model
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config | combine({'small_model': arch_opencode_small_model}, recursive=true) }}
+  when:
+    - arch_opencode_configure_ollama
+    - arch_opencode_small_model | length > 0
+
 - name: Write opencode configuration
   ansible.builtin.copy:
     dest: "{{ arch_opencode_config_path }}"

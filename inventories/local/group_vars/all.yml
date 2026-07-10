@@ -9,6 +9,7 @@ model_presets:
     arch_opencode_configure_ollama: true
     arch_opencode_set_default_model: true
     arch_opencode_model: "ollama/qwen3.5:9b"
+    arch_opencode_small_model: "ollama/qwen3.5:9b"
     arch_opencode_ollama_context_length: "131072"
     arch_opencode_ollama_models:
       qwen3.5:9b:
@@ -25,6 +26,7 @@ model_presets:
     arch_opencode_configure_ollama: true
     arch_opencode_set_default_model: true
     arch_opencode_model: "ollama/gemma4:12b"
+    arch_opencode_small_model: "ollama/gemma4:12b"
     arch_opencode_ollama_context_length: "131072"
     arch_opencode_ollama_models:
       gemma4:12b:
