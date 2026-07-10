@@ -30,7 +30,7 @@
   6. Create a pull request with `gh pr create --title "..." --body "..."`. The body must include a summary of what changed and which validation was run.
 - After creating the PR, ask the user for confirmation ("Ready to merge, or need additional changes?").
   - If the user requests changes, reuse the existing feature branch (do not create a new one). Make the changes, validate, commit, and push; the PR updates automatically, then ask again.
-  - If the user confirms merge, merge the PR with `gh pr merge --merge`, then clean up locally: `git checkout main`, `git pull origin main`, `git branch -d <branch-name>`, and `git remote prune origin`.
+  - If the user confirms merge, merge the PR with `gh pr merge --merge --delete-branch`, then clean up locally: `git checkout main`, `git pull origin main`, `git branch -d <branch-name>`, and `git remote prune origin`.
 - This workflow applies to every change, including updates to `AGENTS.md` itself.
 
 ## Commands
