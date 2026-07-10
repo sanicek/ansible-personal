@@ -1,0 +1,4 @@
+- name: Converge Arch opencode playbook with cloud OpenAI profile
+  ansible.builtin.import_playbook: ../../ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
+  vars:
+    arch_opencode_profile: cloud_openai

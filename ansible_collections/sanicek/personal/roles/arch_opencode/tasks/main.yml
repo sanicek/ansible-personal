@@ -1,24 +1,48 @@
-- name: Install opencode
+- name: Validate opencode profile name
+  ansible.builtin.assert:
+    that:
+      - arch_opencode_profile is match('^[a-z0-9_][a-z0-9_-]*$')
+    fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Use lowercase letters, numbers, underscores, or hyphens."
+  when: arch_opencode_profile | length > 0
+
+- name: Load opencode profile
+  ansible.builtin.include_vars:
+    file: "profiles/{{ arch_opencode_profile }}.yml"
+  when: arch_opencode_profile | length > 0
+
+- name: Install opencode packages
   community.general.pacman:
-    name: "{{ arch_opencode_package }}"
+    name: "{{ [arch_opencode_package] + ([arch_opencode_bun_package] if arch_opencode_install_bun else []) }}"
     state: present
+
+- name: Determine opencode configuration management needs
+  ansible.builtin.set_fact:
+    arch_opencode_manage_core_config: >-
+      {{ arch_opencode_configure_ollama
+         or arch_opencode_core_config | length > 0
+         or arch_opencode_plugins | length > 0
+         or arch_opencode_enable_lsp_default }}
+    arch_opencode_manage_tui_config: >-
+      {{ arch_opencode_tui_config | length > 0
+         or arch_opencode_tui_plugins | length > 0 }}
+    arch_opencode_manage_extra_config: "{{ arch_opencode_extra_config_files | length > 0 }}"
 
 - name: Ensure opencode configuration directory exists
   ansible.builtin.file:
-    path: "{{ arch_opencode_config_path | dirname }}"
+    path: "{{ arch_opencode_config_dir }}"
     state: directory
     mode: "0755"
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
   become: false
-  when: arch_opencode_configure_ollama
+  when: arch_opencode_manage_core_config or arch_opencode_manage_tui_config or arch_opencode_manage_extra_config
 
 - name: Check existing opencode configuration
   ansible.builtin.stat:
     path: "{{ arch_opencode_config_path }}"
   register: arch_opencode_config_file
   become: false
-  when: arch_opencode_configure_ollama
+  when: arch_opencode_manage_core_config
 
 - name: Read existing opencode configuration
   ansible.builtin.slurp:
@@ -26,7 +50,7 @@
   register: arch_opencode_config_content
   become: false
   when:
-    - arch_opencode_configure_ollama
+    - arch_opencode_manage_core_config
     - arch_opencode_config_file.stat.exists
 
 - name: Parse existing opencode configuration
@@ -34,8 +58,34 @@
     arch_opencode_existing_config: >-
       {{ (arch_opencode_config_content.content | b64decode | from_json)
          if arch_opencode_config_file.stat.exists
-         else {} }}
-  when: arch_opencode_configure_ollama
+       else {} }}
+  when: arch_opencode_manage_core_config
+
+- name: Initialize managed opencode configuration
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_existing_config
+         | combine({'$schema': 'https://opencode.ai/config.json'}, recursive=true)
+         | combine(arch_opencode_core_config, recursive=true) }}
+  when: arch_opencode_manage_core_config
+
+- name: Configure opencode plugins
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config
+         | combine({'plugin': ((arch_opencode_managed_config.plugin | default([])) + arch_opencode_plugins) | unique | list}, recursive=true) }}
+  when:
+    - arch_opencode_manage_core_config
+    - arch_opencode_plugins | length > 0
+
+- name: Enable opencode LSP when not already configured
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config | combine({'lsp': true}, recursive=true) }}
+  when:
+    - arch_opencode_manage_core_config
+    - arch_opencode_enable_lsp_default
+    - arch_opencode_managed_config.lsp is not defined
 
 - name: Build opencode Ollama model configuration
   ansible.builtin.set_fact:
@@ -60,8 +110,7 @@
 
 - name: Build opencode Ollama provider configuration
   ansible.builtin.set_fact:
-    arch_opencode_managed_config:
-      "$schema": "https://opencode.ai/config.json"
+    arch_opencode_ollama_provider_config:
       provider: >-
         {{ {
           arch_opencode_ollama_provider_id: {
@@ -73,6 +122,12 @@
             'models': arch_opencode_ollama_model_config
           }
         } }}
+  when: arch_opencode_configure_ollama
+
+- name: Configure opencode Ollama provider
+  ansible.builtin.set_fact:
+    arch_opencode_managed_config: >-
+      {{ arch_opencode_managed_config | combine(arch_opencode_ollama_provider_config, recursive=true) }}
   when: arch_opencode_configure_ollama
 
 - name: Configure opencode default model
@@ -95,9 +150,108 @@
 - name: Write opencode configuration
   ansible.builtin.copy:
     dest: "{{ arch_opencode_config_path }}"
-    content: "{{ arch_opencode_existing_config | combine(arch_opencode_managed_config, recursive=true) | to_nice_json }}\n"
+    content: "{{ arch_opencode_managed_config | to_nice_json }}\n"
     mode: "0644"
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
   become: false
-  when: arch_opencode_configure_ollama
+  when: arch_opencode_manage_core_config
+
+- name: Check existing opencode TUI configuration
+  ansible.builtin.stat:
+    path: "{{ arch_opencode_tui_config_path }}"
+  register: arch_opencode_tui_config_file
+  become: false
+  when: arch_opencode_manage_tui_config
+
+- name: Read existing opencode TUI configuration
+  ansible.builtin.slurp:
+    path: "{{ arch_opencode_tui_config_path }}"
+  register: arch_opencode_tui_config_content
+  become: false
+  when:
+    - arch_opencode_manage_tui_config
+    - arch_opencode_tui_config_file.stat.exists
+
+- name: Parse existing opencode TUI configuration
+  ansible.builtin.set_fact:
+    arch_opencode_existing_tui_config: >-
+      {{ (arch_opencode_tui_config_content.content | b64decode | from_json)
+         if arch_opencode_tui_config_file.stat.exists
+         else {} }}
+  when: arch_opencode_manage_tui_config
+
+- name: Initialize managed opencode TUI configuration
+  ansible.builtin.set_fact:
+    arch_opencode_managed_tui_config: >-
+      {{ arch_opencode_existing_tui_config
+         | combine({'$schema': 'https://opencode.ai/tui.json'}, recursive=true)
+         | combine(arch_opencode_tui_config, recursive=true) }}
+  when: arch_opencode_manage_tui_config
+
+- name: Configure opencode TUI plugins
+  ansible.builtin.set_fact:
+    arch_opencode_managed_tui_config: >-
+      {{ arch_opencode_managed_tui_config
+         | combine({'plugin': ((arch_opencode_managed_tui_config.plugin | default([])) + arch_opencode_tui_plugins) | unique | list}, recursive=true) }}
+  when:
+    - arch_opencode_manage_tui_config
+    - arch_opencode_tui_plugins | length > 0
+
+- name: Write opencode TUI configuration
+  ansible.builtin.copy:
+    dest: "{{ arch_opencode_tui_config_path }}"
+    content: "{{ arch_opencode_managed_tui_config | to_nice_json }}\n"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_manage_tui_config
+
+- name: Ensure opencode extra configuration directories exist
+  ansible.builtin.file:
+    path: "{{ item.path | dirname }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  loop: "{{ arch_opencode_extra_config_files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become: false
+  when: arch_opencode_manage_extra_config
+
+- name: Write opencode extra configuration files
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content | to_nice_json }}\n"
+    mode: "{{ item.mode | default('0644') }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  loop: "{{ arch_opencode_extra_config_files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become: false
+  when: arch_opencode_manage_extra_config
+
+- name: Build opencode shell environment
+  ansible.builtin.set_fact:
+    arch_opencode_effective_shell_env: >-
+      {{ arch_opencode_shell_env
+         | combine({'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS': 'true'}
+                   if arch_opencode_enable_background_subagents else {}) }}
+
+- name: Configure opencode shell environment
+  ansible.builtin.blockinfile:
+    path: "{{ arch_opencode_shell_env_path }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK opencode environment"
+    block: |
+      {% for item in arch_opencode_effective_shell_env | dict2items %}
+      export {{ item.key }}={{ item.value | quote }}
+      {% endfor %}
+    create: true
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_effective_shell_env | length > 0

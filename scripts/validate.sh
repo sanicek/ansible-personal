@@ -75,7 +75,7 @@ validate_arch_opencode() {
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
   build_personal_collection
-  run_molecule_scenarios arch_opencode
+  run_molecule_scenarios arch_opencode arch_opencode_profile
 }
 
 validate_full() {
@@ -99,7 +99,7 @@ validate_full() {
   install_dependencies
   syntax_check_playbooks "${playbooks[@]}"
   build_all_collections
-  run_molecule_scenarios arch_shell arch_terminal arch_cloud arch_k8s arch_opencode
+  run_molecule_scenarios arch_shell arch_terminal arch_cloud arch_k8s arch_opencode arch_opencode_profile
 }
 
 usage() {
