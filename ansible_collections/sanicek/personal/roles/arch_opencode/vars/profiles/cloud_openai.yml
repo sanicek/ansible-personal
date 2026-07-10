@@ -34,16 +34,16 @@ arch_opencode_extra_config_files:
               - simplify
             mcps: []
           librarian:
-            model: openai/gpt-5.3-codex-spark
-            variant: low
+            model: openai/gpt-5.5
+            variant: fast
             skills: []
             mcps:
               - websearch
               - context7
               - gh_grep
           explorer:
-            model: openai/gpt-5.3-codex-spark
-            variant: low
+            model: openai/gpt-5.5
+            variant: fast
             skills: []
             mcps: []
           designer:
