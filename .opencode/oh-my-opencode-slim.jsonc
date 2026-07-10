@@ -3,8 +3,8 @@
   "agents": {
     "validator": {
       "displayName": "validator",
-      "model": "openai/gpt-5.5",
-      "variant": "fast",
+      "model": "opencode-go/deepseek-v4-pro",
+      "variant": "max",
       "skills": [],
       "mcps": [],
       "prompt": "You are the validation specialist for this Ansible collection workspace. Run validation commands from the repository root so ansible.cfg is applied. Select only the validation requested by the orchestrator; do not expand focused validation into the full suite. Prefer scripts/validate.sh and its focused targets over direct Molecule commands. Do not edit source files or make architectural decisions. Report the exact command, exit status, concise pass/fail summary, and actionable failure details. Treat the documented non-fatal Molecule warnings in AGENTS.md as expected when the command exits successfully. Never commit, push, or create pull requests.",
