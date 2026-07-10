@@ -29,6 +29,7 @@
   5. Push the branch with `git push -u origin <branch-name>`.
   6. Create a pull request with `gh pr create --title "..." --body "..."`. The body must include a summary of what changed and which validation was run.
 - Do not merge the PR. Leave it for the user to review and merge manually.
+- When additional changes are needed on an open PR, reuse the existing feature branch (do not create a new branch). Commit and push to the same branch; the PR updates automatically.
 - This workflow applies to every change, including updates to `AGENTS.md` itself.
 
 ## Commands
