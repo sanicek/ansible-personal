@@ -50,7 +50,17 @@
           - arch_opencode_profile_core.agent.general.disable
           - arch_opencode_profile_core.lsp
           - arch_opencode_profile_slim.autoUpdate
-          - arch_opencode_profile_slim.preset == 'openai-light'
-          - arch_opencode_profile_slim.presets['openai-light'].orchestrator.model == 'openai/gpt-5.5'
-          - arch_opencode_profile_slim.presets['openai-light'].fixer.model == 'openai/gpt-5.5-mini'
+          - arch_opencode_profile_slim.preset == 'openai'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.oracle.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.openai.oracle.variant == 'high'
+          - arch_opencode_profile_slim.presets.openai.librarian.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.librarian.variant == 'fast'
+          - arch_opencode_profile_slim.presets.openai.explorer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.explorer.variant == 'fast'
+          - arch_opencode_profile_slim.presets.openai.designer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.designer.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.fixer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.fixer.variant == 'medium'
           - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
