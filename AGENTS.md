@@ -18,6 +18,19 @@
 - Arch is the active target platform for new features, validation, and role improvements. Fedora is sunset/maintenance-only: keep existing playbooks basically functional, but do not add new Fedora playbooks, Molecule scenarios, roles, or improvement work unless explicitly requested.
 - Server roles manage their own firewall via `sanicek.server.ufw`; `arch_ollama` only opens UFW when `arch_ollama_host` is not localhost-only.
 
+## Git Workflow (Build Mode)
+
+- `main` is protected and must never receive direct commits or pushes. All changes go through feature branches.
+- When making changes in build mode:
+  1. Create a branch from `main` with a conventional prefix: `feat/`, `fix/`, `chore/`, `refactor/`, or `docs/` followed by a short kebab-case description (e.g. `feat/add-arch-gaming`).
+  2. Make the changes.
+  3. Run the appropriate validation: full `scripts/validate.sh` for broad changes, or the focused variant (e.g. `scripts/validate.sh arch_shell`) for single-role changes. For docs-only changes that don't touch Ansible content, a syntax-only check on affected playbooks is acceptable.
+  4. After validation passes, stage the changed files and commit with a [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) message (`feat(scope): description`, `fix: description`, `chore: description`, `docs: description`, etc.).
+  5. Push the branch with `git push -u origin <branch-name>`.
+  6. Create a pull request with `gh pr create --title "..." --body "..."`. The body must include a summary of what changed and which validation was run.
+- Do not merge the PR. Leave it for the user to review and merge manually.
+- This workflow applies to every change, including updates to `AGENTS.md` itself.
+
 ## Commands
 - Fresh Arch bootstrap only: `sudo bash scripts/bootstrap.sh [username]` (`username` defaults to `cac`; installs `sudo`, `git`, `ansible`, creates the user, and enables passwordless sudo).
 - Run one playbook: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml`.
