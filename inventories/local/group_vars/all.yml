@@ -1,5 +1,6 @@
 # Shared defaults for local playbooks across collections.
 # Keep this file committed for non-secret defaults used by all local runs.
+# Model presets are opt-in; pass -e model_preset=<preset> to apply one.
 model_presets:
   qwen35_9b:
     name: "Qwen3.5 9B"
@@ -34,5 +35,3 @@ model_presets:
         tool_call: true
         reasoning: true
         attachment: true
-
-model_preset: "gemma4_12b"
