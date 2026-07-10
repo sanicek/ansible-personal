@@ -2,7 +2,7 @@
 # host_vars/localhost.yml is gitignored and overrides group_vars/all.yml.
 #
 # Model selection is managed via git-tracked presets in group_vars/all.yml.
-# Choose a preset at runtime:
+# No preset is selected by default. Choose one at runtime:
 #   ansible-playbook ... -e model_preset=qwen35_9b
 # Available presets are listed in group_vars/all.yml under model_presets.
 
