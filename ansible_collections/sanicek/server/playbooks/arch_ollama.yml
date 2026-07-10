@@ -1,5 +1,13 @@
 - name: Install Arch Ollama server
   hosts: local
   become: true
+  pre_tasks:
+    - name: Apply model preset
+      ansible.builtin.set_fact:
+        "{{ item.key }}": "{{ item.value }}"
+      loop: "{{ model_presets[model_preset] | dict2items | rejectattr('key', 'equalto', 'name') | list }}"
+      when: model_preset is defined and model_preset in model_presets
+      loop_control:
+        label: "{{ item.key }}"
   roles:
     - sanicek.server.arch_ollama

@@ -1,53 +1,22 @@
 # Copy this file to localhost.yml for private local overrides.
 # host_vars/localhost.yml is gitignored and overrides group_vars/all.yml.
-
-# sanicek.personal examples:
-# personal_some_setting: value
-
-# sanicek.personal.arch_opencode examples:
-# arch_opencode_configure_ollama: true
-# arch_opencode_set_default_model: true
-# arch_opencode_model: "ollama/qwen3.6:35b"
-# arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
-# arch_opencode_ollama_models:
-#   qwen3.6:35b:
-#     name: "Qwen3.6 35B (local Ollama)"
-#     tool_call: true
-#     reasoning: true
-#     attachment: true
 #
-# gemma4:12b subagent @ 128k (matching arch_ollama_context_length):
-# arch_opencode_configure_ollama: true
-# arch_opencode_set_default_model: true
-# arch_opencode_model: "ollama/gemma4:12b"
-# arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
-# arch_opencode_ollama_context_length: "131072"
-# arch_opencode_ollama_models:
-#   gemma4:12b:
-#     name: "Gemma4 12B (local Ollama)"
-#     tool_call: true
-#     reasoning: true
-#     attachment: true
+# Model selection is managed via git-tracked presets in group_vars/all.yml.
+# Choose a preset at runtime:
+#   ansible-playbook ... -e model_preset=qwen35_9b
+# Available presets are listed in group_vars/all.yml under model_presets.
 
-# sanicek.server.arch_ollama examples:
-# arch_ollama_host: "127.0.0.1:11434"
-# arch_ollama_host: "0.0.0.0:11434"
-# arch_ollama_context_length: "65536"
-# arch_ollama_keep_alive: "1h"
-# arch_ollama_models:
-#   - qwen3.6:35b
+# sanicek.server.arch_ollama machine overrides:
+# (GPU-specific, keep here — not part of model presets)
+# arch_ollama_rocm_hsa_override_gfx_version: "12.0.0"
+#
+# (Firewall customization)
 # arch_ollama_firewall_rules:
 #   - port: "11434"
 #     proto: tcp
 #     rule: allow
 #     from_ip: "192.168.1.0/24"
 #     comment: Ollama API
-#
-# AMD RX 9070 / RDNA 4 (gfx1201) with gemma4:12b @ 128k:
-# arch_ollama_rocm_hsa_override_gfx_version: "12.0.0"
-# arch_ollama_context_length: "131072"
-# arch_ollama_models:
-#   - gemma4:12b
 
 # sanicek.server.arch_sshd examples:
 # arch_sshd_firewall_rules:
