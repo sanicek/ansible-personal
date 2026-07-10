@@ -34,7 +34,7 @@ arch_opencode_extra_config_files:
               - simplify
             mcps: []
           librarian:
-            model: openai/gpt-5.3-codex
+            model: openai/gpt-5.3-codex-spark
             variant: low
             skills: []
             mcps:
@@ -42,7 +42,7 @@ arch_opencode_extra_config_files:
               - context7
               - gh_grep
           explorer:
-            model: openai/gpt-5.3-codex
+            model: openai/gpt-5.3-codex-spark
             variant: low
             skills: []
             mcps: []
