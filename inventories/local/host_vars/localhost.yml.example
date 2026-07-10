@@ -29,6 +29,12 @@
 #     rule: allow
 #     from_ip: "192.168.1.0/24"
 #     comment: Ollama API
+#
+# AMD RX 9070 / RDNA 4 (gfx1201) with gemma4:12b @ 128k:
+# arch_ollama_rocm_hsa_override_gfx_version: "12.0.0"
+# arch_ollama_context_length: "131072"
+# arch_ollama_models:
+#   - gemma4:12b
 
 # sanicek.server.arch_sshd examples:
 # arch_sshd_firewall_rules:
