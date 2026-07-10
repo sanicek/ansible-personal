@@ -15,6 +15,19 @@
 #     tool_call: true
 #     reasoning: true
 #     attachment: true
+#
+# gemma4:12b subagent @ 128k (matching arch_ollama_context_length):
+# arch_opencode_configure_ollama: true
+# arch_opencode_set_default_model: true
+# arch_opencode_model: "ollama/gemma4:12b"
+# arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
+# arch_opencode_ollama_context_length: "131072"
+# arch_opencode_ollama_models:
+#   gemma4:12b:
+#     name: "Gemma4 12B (local Ollama)"
+#     tool_call: true
+#     reasoning: true
+#     attachment: true
 
 # sanicek.server.arch_ollama examples:
 # arch_ollama_host: "127.0.0.1:11434"
