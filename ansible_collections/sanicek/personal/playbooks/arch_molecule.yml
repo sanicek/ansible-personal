@@ -3,4 +3,5 @@
   become: true
   roles:
     - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_podman
     - sanicek.personal.arch_molecule

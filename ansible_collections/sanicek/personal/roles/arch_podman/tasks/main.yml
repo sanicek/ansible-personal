@@ -1,0 +1,75 @@
+- name: Install Podman packages
+  community.general.pacman:
+    name: "{{ arch_podman_packages }}"
+    state: present
+    update_cache: true
+
+- name: Detect WSL environment
+  ansible.builtin.set_fact:
+    arch_podman_is_wsl: >-
+      {{ (arch_podman_configure_wsl | bool)
+         and (
+           lookup('ansible.builtin.env', 'WSL_DISTRO_NAME') | length > 0
+           or lookup('ansible.builtin.env', 'WSL_INTEROP') | length > 0
+           or (ansible_facts.get('kernel', '') is search('(?i)(microsoft|wsl)'))
+         ) }}
+
+- name: Ensure user containers configuration directory exists
+  ansible.builtin.file:
+    path: "{{ arch_podman_containers_conf_path | dirname }}"
+    state: directory
+    mode: "0755"
+  become: false
+  when: arch_podman_is_wsl | bool
+
+- name: Configure WSL Podman cgroup manager
+  community.general.ini_file:
+    path: "{{ arch_podman_containers_conf_path }}"
+    section: engine
+    option: cgroup_manager
+    value: '"cgroupfs"'
+    mode: "0644"
+  become: false
+  when: arch_podman_is_wsl | bool
+
+- name: Configure WSL Podman event logger
+  community.general.ini_file:
+    path: "{{ arch_podman_containers_conf_path }}"
+    section: engine
+    option: events_logger
+    value: '"file"'
+    mode: "0644"
+  become: false
+  when: arch_podman_is_wsl | bool
+
+- name: Configure WSL Podman build isolation
+  community.general.ini_file:
+    path: "{{ arch_podman_containers_conf_path }}"
+    section: engine
+    option: env
+    value: '["BUILDAH_ISOLATION={{ arch_podman_wsl_buildah_isolation }}"]'
+    mode: "0644"
+  become: false
+  when: arch_podman_is_wsl | bool
+
+- name: Check loginctl availability
+  ansible.builtin.stat:
+    path: /usr/bin/loginctl
+  register: arch_podman_loginctl
+  when: arch_podman_is_wsl | bool
+
+- name: Check user lingering state
+  ansible.builtin.command: "loginctl show-user {{ user_name }}"
+  register: arch_podman_linger
+  changed_when: false
+  failed_when: false
+  when:
+    - arch_podman_is_wsl | bool
+    - arch_podman_loginctl.stat.exists | default(false)
+
+- name: Enable user lingering for rootless Podman in WSL
+  ansible.builtin.command: "loginctl enable-linger {{ user_name }}"
+  when:
+    - arch_podman_is_wsl | bool
+    - arch_podman_loginctl.stat.exists | default(false)
+    - (arch_podman_linger.rc | default(1)) != 0 or (arch_podman_linger.stdout | default('')) is not search('(?m)^Linger=yes$')
