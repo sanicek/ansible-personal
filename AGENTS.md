@@ -34,6 +34,7 @@
 - This workflow applies to every change, including updates to `AGENTS.md` itself.
 
 ## Commands
+- Delegate long-running validation commands, especially `scripts/validate.sh` and direct `molecule test` runs, to the `fixer` agent instead of running them in the orchestrator lane. The orchestrator remains responsible for selecting the appropriate validation target, reviewing the result, and reporting it to the user.
 - Fresh Arch bootstrap only: `sudo bash scripts/bootstrap.sh [username]` (`username` defaults to `cac`; installs `sudo`, `git`, `ansible`, creates the user, and enables passwordless sudo).
 - Run one playbook: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml`.
 - Focused syntax check: `ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check`.
