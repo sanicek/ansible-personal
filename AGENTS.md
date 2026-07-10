@@ -28,8 +28,9 @@
   4. After validation passes, stage the changed files and commit with a [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) message (`feat(scope): description`, `fix: description`, `chore: description`, `docs: description`, etc.).
   5. Push the branch with `git push -u origin <branch-name>`.
   6. Create a pull request with `gh pr create --title "..." --body "..."`. The body must include a summary of what changed and which validation was run.
-- Do not merge the PR. Leave it for the user to review and merge manually.
-- When additional changes are needed on an open PR, reuse the existing feature branch (do not create a new branch). Commit and push to the same branch; the PR updates automatically.
+- After creating the PR, ask the user for confirmation ("Ready to merge, or need additional changes?").
+  - If the user requests changes, reuse the existing feature branch (do not create a new one). Make the changes, validate, commit, and push; the PR updates automatically, then ask again.
+  - If the user confirms merge, merge the PR with `gh pr merge --merge`, then clean up locally: `git checkout main`, `git pull origin main`, `git branch -d <branch-name>`, and `git remote prune origin`.
 - This workflow applies to every change, including updates to `AGENTS.md` itself.
 
 ## Commands
