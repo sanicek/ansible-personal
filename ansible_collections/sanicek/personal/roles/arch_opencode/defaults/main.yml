@@ -1,7 +1,22 @@
 arch_opencode_package: opencode
+arch_opencode_bun_package: bun
+arch_opencode_install_bun: false
+
+arch_opencode_profile: ""
 
 arch_opencode_configure_ollama: false
 arch_opencode_config_path: "{{ user_home }}/.config/opencode/opencode.jsonc"
+arch_opencode_config_dir: "{{ arch_opencode_config_path | dirname }}"
+arch_opencode_tui_config_path: "{{ arch_opencode_config_dir }}/tui.jsonc"
+arch_opencode_core_config: {}
+arch_opencode_tui_config: {}
+arch_opencode_plugins: []
+arch_opencode_tui_plugins: []
+arch_opencode_extra_config_files: []
+arch_opencode_enable_lsp_default: false
+arch_opencode_enable_background_subagents: false
+arch_opencode_shell_env: {}
+arch_opencode_shell_env_path: "{{ user_home }}/.bashrc"
 
 arch_opencode_ollama_provider_id: ollama
 arch_opencode_ollama_provider_name: "Ollama (local)"

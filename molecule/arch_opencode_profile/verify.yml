@@ -1,0 +1,56 @@
+- name: Verify Arch opencode cloud OpenAI profile
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check opencode package
+      ansible.builtin.command: pacman -Q opencode
+      register: arch_opencode_profile_packages
+      changed_when: false
+
+    - name: Check bun package
+      ansible.builtin.command: pacman -Q bun
+      register: arch_opencode_profile_bun
+      changed_when: false
+
+    - name: Read opencode core config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/opencode.jsonc
+      register: arch_opencode_profile_core_config
+
+    - name: Read opencode TUI config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/tui.jsonc
+      register: arch_opencode_profile_tui_config
+
+    - name: Read oh-my-opencode-slim config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim.json
+      register: arch_opencode_profile_slim_config
+
+    - name: Read user bashrc
+      ansible.builtin.slurp:
+        path: /home/molecule/.bashrc
+      register: arch_opencode_profile_bashrc
+
+    - name: Parse opencode profile configs
+      ansible.builtin.set_fact:
+        arch_opencode_profile_core: "{{ arch_opencode_profile_core_config.content | b64decode | from_json }}"
+        arch_opencode_profile_tui: "{{ arch_opencode_profile_tui_config.content | b64decode | from_json }}"
+        arch_opencode_profile_slim: "{{ arch_opencode_profile_slim_config.content | b64decode | from_json }}"
+        arch_opencode_profile_bashrc_text: "{{ arch_opencode_profile_bashrc.content | b64decode }}"
+
+    - name: Assert expected Arch opencode profile configuration
+      ansible.builtin.assert:
+        that:
+          - "'opencode' in arch_opencode_profile_packages.stdout"
+          - "'bun' in arch_opencode_profile_bun.stdout"
+          - "'oh-my-opencode-slim@latest' in arch_opencode_profile_core.plugin"
+          - "'oh-my-opencode-slim@latest' in arch_opencode_profile_tui.plugin"
+          - arch_opencode_profile_core.agent.explore.disable
+          - arch_opencode_profile_core.agent.general.disable
+          - arch_opencode_profile_core.lsp
+          - arch_opencode_profile_slim.autoUpdate
+          - arch_opencode_profile_slim.preset == 'openai-light'
+          - arch_opencode_profile_slim.presets['openai-light'].orchestrator.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets['openai-light'].fixer.model == 'openai/gpt-5.5-mini'
+          - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
