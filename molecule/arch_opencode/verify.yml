@@ -121,7 +121,7 @@
           - arch_opencode_profile_core.agent.general.disable
           - arch_opencode_profile_core.lsp
           - arch_opencode_profile_slim.autoUpdate
-          - arch_opencode_profile_slim.preset == 'openai'
+          - arch_opencode_profile_slim.preset == ('hybrid' if arch_opencode_profile == 'hybrid_qwen35b_go' else 'openai')
           - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol'
           - arch_opencode_profile_slim.presets.openai.orchestrator.variant == 'medium'
           - arch_opencode_profile_slim.presets.openai.oracle.model == 'openai/gpt-5.6-sol'
@@ -188,6 +188,7 @@
     - name: Assert hybrid Qwen 35B profile configuration
       ansible.builtin.assert:
         that:
+          - arch_opencode_profile_slim.preset == 'hybrid'
           - arch_opencode_profile_slim.presets.hybrid.orchestrator.model == 'openai/gpt-5.6-sol'
           - arch_opencode_profile_slim.presets.hybrid.orchestrator.variant == 'medium'
           - arch_opencode_profile_slim.presets.hybrid.oracle.model == 'openai/gpt-5.6-sol'

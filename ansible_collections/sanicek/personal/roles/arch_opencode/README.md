@@ -55,7 +55,7 @@ Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
 
 ### hybrid_qwen35b_go profile
 
-Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b`. Its hybrid preset assigns the local model to both Librarian and Explorer.
+Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b` and selects `hybrid` by default. Its hybrid preset assigns the local model to both Librarian and Explorer.
 
 Hybrid OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
