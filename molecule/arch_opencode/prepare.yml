@@ -1,3 +1,12 @@
+- name: Refresh Pacman package database for all scenario hosts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Update pacman cache
+      community.general.pacman:
+        update_cache: true
+      become: true
+
 - name: Seed managed config on install-only host
   hosts: install-only
   gather_facts: false
