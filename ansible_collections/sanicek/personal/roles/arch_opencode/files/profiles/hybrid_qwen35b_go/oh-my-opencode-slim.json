@@ -77,6 +77,42 @@
         "mcps": []
       }
     },
+    "hybridgo": {
+      "orchestrator": {
+        "model": "opencode-go/deepseek-v4-pro",
+        "variant": "max",
+        "skills": ["*"],
+        "mcps": []
+      },
+      "oracle": {
+        "model": "opencode-go/glm-5.2",
+        "variant": "max",
+        "skills": ["simplify"],
+        "mcps": []
+      },
+      "librarian": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": ["websearch", "context7", "gh_grep"]
+      },
+      "explorer": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": []
+      },
+      "designer": {
+        "model": "opencode-go/deepseek-v4-pro",
+        "variant": "max",
+        "skills": [],
+        "mcps": []
+      },
+      "fixer": {
+        "model": "opencode-go/deepseek-v4-pro",
+        "variant": "max",
+        "skills": [],
+        "mcps": []
+      }
+    },
     "superbudget": {
       "orchestrator": {
         "model": "opencode-go/deepseek-v4-flash",
