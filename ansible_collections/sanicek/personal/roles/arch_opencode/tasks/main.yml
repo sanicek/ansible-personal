@@ -36,6 +36,26 @@
   loop: "{{ arch_opencode_managed_files }}"
   when: arch_opencode_profile | length > 0
 
+- name: Ensure oh-my-opencode-slim directory exists
+  ansible.builtin.file:
+    path: "{{ arch_opencode_config_dir }}/oh-my-opencode-slim"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_profile | length > 0
+
+- name: Deploy shared orchestrator append prompt
+  ansible.builtin.copy:
+    src: orchestrator_append.md
+    dest: "{{ arch_opencode_config_dir }}/oh-my-opencode-slim/orchestrator_append.md"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_profile | length > 0
+
 - name: Build opencode shell environment
   ansible.builtin.set_fact:
     arch_opencode_effective_shell_env: >-
