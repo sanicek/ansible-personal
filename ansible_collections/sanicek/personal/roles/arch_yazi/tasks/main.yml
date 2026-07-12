@@ -32,6 +32,17 @@
   environment:
     HOME: "{{ user_home }}"
 
+- name: Configure Yazi manager ratio
+  ansible.builtin.copy:
+    dest: "{{ user_home }}/.config/yazi/yazi.toml"
+    content: |
+      [mgr]
+      ratio = [ {{ arch_yazi_ratio | join(', ') }} ]
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: true
+
 - name: Configure Yazi Solarized Dark flavor
   ansible.builtin.copy:
     dest: "{{ user_home }}/.config/yazi/theme.toml"

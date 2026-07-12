@@ -22,6 +22,11 @@
         path: /usr/local/share/bash-git-prompt/gitprompt.sh
       register: arch_shell_git_prompt
 
+    - name: Check Yazi manager configuration
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/yazi/yazi.toml
+      register: arch_shell_yazi_config
+
     - name: Check Yazi flavor configuration
       ansible.builtin.stat:
         path: /home/molecule/.config/yazi/theme.toml
@@ -33,6 +38,8 @@
           - arch_shell_fzf_profile.stat.exists
           - arch_shell_git_prompt.stat.exists
           - arch_shell_yazi_theme.stat.exists
+          - "'[mgr]' in (arch_shell_yazi_config.content | b64decode)"
+          - "'ratio = [ 1, 2, 3 ]' in (arch_shell_yazi_config.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_user_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_system_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_user_bashrc.content | b64decode)"
