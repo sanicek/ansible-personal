@@ -1,0 +1,153 @@
+- name: Seed managed config on install-only host
+  hosts: install-only
+  gather_facts: false
+  tasks:
+    - name: Ensure seeded opencode config directory exists for install-only
+      ansible.builtin.file:
+        path: /home/molecule/.config/opencode
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      become: true
+
+    - name: Seed known opencode config on install-only
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/opencode.jsonc
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "plugin": ["preexisting-plugin@1.0"],
+            "lsp": false
+          }
+      become: true
+
+    - name: Seed known TUI config on install-only
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/tui.jsonc
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "$schema": "https://opencode.ai/tui.json",
+            "plugin": ["preexisting-tui-plugin@1.0"]
+          }
+      become: true
+
+- name: Seed existing opencode config for stale-key removal test
+  hosts: hybrid-profile
+  gather_facts: false
+  tasks:
+    - name: Ensure seeded opencode config directory exists
+      ansible.builtin.file:
+        path: /home/molecule/.config/opencode
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      become: true
+
+    - name: Seed stale Ollama model and extra provider in opencode config
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/opencode.jsonc
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "ollama": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "Ollama (local)",
+                "options": {
+                  "baseURL": "http://127.0.0.1:11434/v1"
+                },
+                "models": {
+                  "stale-model:latest": {
+                    "name": "Stale local model",
+                    "tool_call": false
+                  }
+                }
+              },
+              "seeded-other": {
+                "name": "Seeded Other Provider"
+              }
+            }
+          }
+      become: true
+
+    - name: Seed stale TUI config
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/tui.jsonc
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "$schema": "https://opencode.ai/tui.json",
+            "plugin": ["stale-plugin@1.0"]
+          }
+      become: true
+
+    - name: Seed stale oh-my-opencode-slim config
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/oh-my-opencode-slim.json
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
+            "autoUpdate": false,
+            "preset": "stale-preset",
+            "presets": {
+              "stale-preset": {
+                "orchestrator": {
+                  "model": "stale/model",
+                  "variant": "low",
+                  "skills": [],
+                  "mcps": []
+                }
+              }
+            }
+          }
+      become: true
+
+    - name: Seed unknown sibling/runtime-state file on hybrid profile
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/.runtime-state
+        mode: "0644"
+        owner: molecule
+        group: molecule
+        content: "runtime-state-data\n"
+      become: true
+
+- name: Seed unknown sibling file on cloud profile
+  hosts: cloud-profile
+  gather_facts: false
+  tasks:
+    - name: Ensure seeded opencode config directory exists
+      ansible.builtin.file:
+        path: /home/molecule/.config/opencode
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      become: true
+
+    - name: Seed unknown sibling/auth file on cloud profile
+      ansible.builtin.copy:
+        dest: /home/molecule/.config/opencode/auth.json
+        mode: "0600"
+        owner: molecule
+        group: molecule
+        content: |
+          {
+            "token": "test-auth-token-should-survive"
+          }
+      become: true

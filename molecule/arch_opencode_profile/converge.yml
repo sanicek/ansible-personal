@@ -1,2 +1,0 @@
-- name: Converge Arch opencode playbook with deployable profiles
-  ansible.builtin.import_playbook: ../../ansible_collections/sanicek/personal/playbooks/arch_opencode.yml

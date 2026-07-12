@@ -1,16 +1,6 @@
 - name: Install Arch opencode
   hosts: local
   become: true
-  pre_tasks:
-    - name: Apply model preset
-      ansible.builtin.set_fact:
-        "{{ item.key }}": "{{ item.value }}"
-      loop: >-
-        {{ (model_presets | default({})).get(model_preset | default(''), {})
-           | dict2items | rejectattr('key', 'equalto', 'name') | list }}
-      when: model_preset is defined and model_preset in model_presets
-      loop_control:
-        label: "{{ item.key }}"
   roles:
     - sanicek.personal.arch_bootstrap
     - sanicek.personal.arch_opencode

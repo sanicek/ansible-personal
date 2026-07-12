@@ -1,7 +1,8 @@
-- name: Verify Arch opencode installation
+- name: Verify Arch opencode installation and profiles
   hosts: local
   gather_facts: false
   tasks:
+    # --- Package and binary checks (all platforms) ---
     - name: Check opencode package
       ansible.builtin.command: pacman -Q opencode
       register: arch_opencode_packages
@@ -22,16 +23,195 @@
       register: arch_opencode_lazyskills_version
       changed_when: false
 
-    - name: Check opencode config is not provisioned by default
-      ansible.builtin.stat:
+    # --- Install-only assertions ---
+    - name: Read seeded opencode config on install-only
+      ansible.builtin.slurp:
         path: /home/molecule/.config/opencode/opencode.jsonc
-      register: arch_opencode_config
+      register: arch_opencode_seeded_core_config
+      when: arch_opencode_profile | length == 0
 
-    - name: Assert expected Arch opencode installation
+    - name: Check seeded install-only config is unchanged
+      ansible.builtin.set_fact:
+        arch_opencode_seeded_core: "{{ arch_opencode_seeded_core_config.content | b64decode | from_json }}"
+      when: arch_opencode_profile | length == 0
+
+    - name: Assert install-only leaves managed config untouched
       ansible.builtin.assert:
         that:
           - "'opencode' in arch_opencode_packages.stdout"
           - arch_opencode_binary.stat.exists
           - arch_opencode_lazyskills_binary.stat.exists
           - arch_opencode_lazyskills_version.rc == 0
-          - not arch_opencode_config.stat.exists
+          - "'preexisting-plugin@1.0' in arch_opencode_seeded_core.plugin"
+          - not arch_opencode_seeded_core.lsp
+      when: arch_opencode_profile | length == 0
+
+    # --- Profile configuration checks ---
+    - name: Check bun package for profiles
+      ansible.builtin.command: pacman -Q bun
+      register: arch_opencode_profile_bun
+      changed_when: false
+      when: arch_opencode_profile | length > 0
+
+    - name: Read opencode core config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/opencode.jsonc
+      register: arch_opencode_profile_core_config
+      when: arch_opencode_profile | length > 0
+
+    - name: Read opencode TUI config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/tui.jsonc
+      register: arch_opencode_profile_tui_config
+      when: arch_opencode_profile | length > 0
+
+    - name: Read oh-my-opencode-slim config
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim.json
+      register: arch_opencode_profile_slim_config
+      when: arch_opencode_profile | length > 0
+
+    - name: Read user bashrc
+      ansible.builtin.slurp:
+        path: /home/molecule/.bashrc
+      register: arch_opencode_profile_bashrc
+      when: arch_opencode_profile | length > 0
+
+    # --- Sibling file preservation checks ---
+    - name: Check unknown sibling file on hybrid profile
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/.runtime-state
+      register: arch_opencode_sibling_runtime
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Read sibling runtime file on hybrid profile
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/.runtime-state
+      register: arch_opencode_sibling_runtime_content
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Check unknown sibling file on cloud profile
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/auth.json
+      register: arch_opencode_sibling_auth
+      when: arch_opencode_profile == 'cloud_openai'
+
+    - name: Read sibling auth file on cloud profile
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/auth.json
+      register: arch_opencode_sibling_auth_content
+      when: arch_opencode_profile == 'cloud_openai'
+
+    - name: Parse opencode profile configs
+      ansible.builtin.set_fact:
+        arch_opencode_profile_core: "{{ arch_opencode_profile_core_config.content | b64decode | from_json }}"
+        arch_opencode_profile_tui: "{{ arch_opencode_profile_tui_config.content | b64decode | from_json }}"
+        arch_opencode_profile_slim: "{{ arch_opencode_profile_slim_config.content | b64decode | from_json }}"
+        arch_opencode_profile_bashrc_text: "{{ arch_opencode_profile_bashrc.content | b64decode }}"
+      when: arch_opencode_profile | length > 0
+
+    # --- Common profile assertions ---
+    - name: Assert common profile configuration
+      ansible.builtin.assert:
+        that:
+          - "'opencode' in arch_opencode_packages.stdout"
+          - "'bun' in arch_opencode_profile_bun.stdout"
+          - "'oh-my-opencode-slim@latest' in arch_opencode_profile_core.plugin"
+          - arch_opencode_profile_core.agent.explore.disable
+          - arch_opencode_profile_core.agent.general.disable
+          - arch_opencode_profile_core.lsp
+          - arch_opencode_profile_slim.autoUpdate
+          - arch_opencode_profile_slim.preset == 'openai'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.oracle.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.openai.oracle.variant == 'high'
+          - arch_opencode_profile_slim.presets.openai.librarian.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.librarian.variant == 'fast'
+          - arch_opencode_profile_slim.presets.openai.explorer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.explorer.variant == 'fast'
+          - arch_opencode_profile_slim.presets.openai.designer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.designer.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.fixer.model == 'openai/gpt-5.5'
+          - arch_opencode_profile_slim.presets.openai.fixer.variant == 'medium'
+          - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
+      when: arch_opencode_profile | length > 0
+
+    # --- Cross-profile OpenAI preset identity check ---
+    - name: Assert cloud and hybrid OpenAI presets stay identical
+      ansible.builtin.assert:
+        that:
+          - hostvars['cloud-profile'].arch_opencode_profile_slim.presets.openai == hostvars['hybrid-profile'].arch_opencode_profile_slim.presets.openai
+      delegate_to: cloud-profile
+      run_once: true
+
+    # --- Cloud-specific assertions ---
+    - name: Assert cloud OpenAI profile has no hybrid extras
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_slim.presets.hybrid is not defined
+          - arch_opencode_profile_core.provider is not defined
+      when: arch_opencode_profile == 'cloud_openai'
+
+    # --- Hybrid-specific assertions ---
+    - name: Assert hybrid qwen/go profile configuration
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_slim.presets.hybrid.orchestrator.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.hybrid.orchestrator.variant == 'medium'
+          - arch_opencode_profile_slim.presets.hybrid.oracle.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.hybrid.oracle.variant == 'high'
+          - arch_opencode_profile_slim.presets.hybrid.explorer.model == 'ollama/qwen3.5:9b'
+          - arch_opencode_profile_slim.presets.hybrid.explorer.variant is not defined
+          - arch_opencode_profile_slim.presets.hybrid.librarian.model == 'opencode-go/deepseek-v4-flash'
+          - arch_opencode_profile_slim.presets.hybrid.librarian.variant is not defined
+          - arch_opencode_profile_slim.presets.hybrid.fixer.model == 'opencode-go/deepseek-v4-pro'
+          - arch_opencode_profile_slim.presets.hybrid.fixer.variant == 'max'
+          - arch_opencode_profile_slim.presets.hybrid.designer.model == 'opencode-go/deepseek-v4-pro'
+          - arch_opencode_profile_slim.presets.hybrid.designer.variant == 'max'
+          - arch_opencode_profile_core.provider.ollama.npm == '@ai-sdk/openai-compatible'
+          - arch_opencode_profile_core.provider.ollama.name == 'Ollama (local)'
+          - arch_opencode_profile_core.provider.ollama.options.baseURL == 'http://127.0.0.1:11434/v1'
+          - (arch_opencode_profile_core.provider.ollama.models.keys() | list | sort) == ['qwen3.5:9b']
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].name == 'Qwen3.5 9B (local Ollama)'
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].attachment
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].reasoning
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].tool_call
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].limit.context == 131072
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.5:9b'].limit.output == 8192
+          # Whole-file replacement: stale keys and extra providers must be gone
+          - "'stale-model:latest' not in arch_opencode_profile_core.provider.ollama.models"
+          - arch_opencode_profile_core.provider['seeded-other'] is not defined
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    # --- Stale-key removal verification on TUI and OmO configs ---
+    - name: Assert stale TUI plugin replaced by exact managed list on hybrid profile
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_tui.plugin == ['oh-my-opencode-slim@latest']
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Assert stale OmO config fully replaced on hybrid profile
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_slim.autoUpdate
+          - arch_opencode_profile_slim.preset == 'openai'
+          - arch_opencode_profile_slim.presets['stale-preset'] is not defined
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    # --- Sibling/runtime-state file preservation ---
+    - name: Assert unknown sibling files survive profile deployment
+      ansible.builtin.assert:
+        that:
+          # Hybrid: .runtime-state must still exist with original content
+          - arch_opencode_sibling_runtime.stat.exists
+          - "'runtime-state-data' in (arch_opencode_sibling_runtime_content.content | b64decode)"
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Assert unknown auth file survives cloud profile deployment
+      ansible.builtin.assert:
+        that:
+          # Cloud: auth.json must still exist with original content
+          - arch_opencode_sibling_auth.stat.exists
+          - "'test-auth-token-should-survive' in (arch_opencode_sibling_auth_content.content | b64decode)"
+      when: arch_opencode_profile == 'cloud_openai'
