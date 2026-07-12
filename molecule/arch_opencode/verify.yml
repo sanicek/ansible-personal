@@ -102,6 +102,43 @@
       register: arch_opencode_sibling_auth_content
       when: arch_opencode_profile == 'cloud_openai'
 
+    # --- Oh-my-opencode-slim subdirectory sibling preservation ---
+    - name: Read nested sibling file on hybrid profile
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim/.sibling-runtime
+      register: arch_opencode_nested_sibling
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    # --- Orchestrator append checks ---
+    - name: Check oh-my-opencode-slim subdirectory on configured profiles
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim
+      register: arch_opencode_slim_dir_stat
+      when: arch_opencode_profile | length > 0
+
+    - name: Check orchestrator append on configured profiles
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim/orchestrator_append.md
+      register: arch_opencode_append_stat
+      when: arch_opencode_profile | length > 0
+
+    - name: Read orchestrator append on configured profiles
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim/orchestrator_append.md
+      register: arch_opencode_append_content
+      when: arch_opencode_profile | length > 0
+
+    - name: Decode orchestrator append text
+      ansible.builtin.set_fact:
+        arch_opencode_append_text: "{{ arch_opencode_append_content.content | b64decode }}"
+      when: arch_opencode_profile | length > 0
+
+    - name: Check orchestrator append absent on install-only
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/oh-my-opencode-slim/orchestrator_append.md
+      register: arch_opencode_append_absent_stat
+      when: arch_opencode_profile | length == 0
+
     - name: Parse opencode profile configs
       ansible.builtin.set_fact:
         arch_opencode_profile_core: "{{ arch_opencode_profile_core_config.content | b64decode | from_json }}"
@@ -137,6 +174,43 @@
           - arch_opencode_profile_slim.presets.openai.fixer.variant == 'medium'
           - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
       when: arch_opencode_profile | length > 0
+
+    # --- Orchestrator append assertions ---
+    - name: Load expected orchestrator append source
+      ansible.builtin.set_fact:
+        expected_append: "{{ lookup('file', playbook_dir ~ '/../../ansible_collections/sanicek/personal/roles/arch_opencode/files/orchestrator_append.md', rstrip=false) }}"
+      run_once: true
+
+    - name: Assert oh-my-opencode-slim subdirectory deployed on configured profiles
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_slim_dir_stat.stat.exists
+          - arch_opencode_slim_dir_stat.stat.isdir
+          - arch_opencode_slim_dir_stat.stat.mode == '0755'
+          - arch_opencode_slim_dir_stat.stat.pw_name == 'molecule'
+          - arch_opencode_slim_dir_stat.stat.gr_name == 'molecule'
+      when: arch_opencode_profile | length > 0
+
+    - name: Assert orchestrator append deployed on configured profiles
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_append_stat.stat.exists
+          - arch_opencode_append_stat.stat.mode == '0644'
+          - arch_opencode_append_stat.stat.pw_name == 'molecule'
+          - arch_opencode_append_stat.stat.gr_name == 'molecule'
+      when: arch_opencode_profile | length > 0
+
+    - name: Assert orchestrator append content matches source on hybrid profile
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_append_text == expected_append
+      when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Assert orchestrator append absent on install-only
+      ansible.builtin.assert:
+        that:
+          - not arch_opencode_append_absent_stat.stat.exists
+      when: arch_opencode_profile | length == 0
 
     # --- Cross-profile OpenAI preset identity check ---
     - name: Assert cloud and hybrid OpenAI presets stay identical
@@ -252,3 +326,9 @@
           - arch_opencode_sibling_auth.stat.exists
           - "'test-auth-token-should-survive' in (arch_opencode_sibling_auth_content.content | b64decode)"
       when: arch_opencode_profile == 'cloud_openai'
+
+    - name: Assert nested sibling survives on hybrid profile
+      ansible.builtin.assert:
+        that:
+          - "'unrelated-sibling-runtime' in (arch_opencode_nested_sibling.content | b64decode)"
+      when: arch_opencode_profile == 'hybrid_qwen_go'
