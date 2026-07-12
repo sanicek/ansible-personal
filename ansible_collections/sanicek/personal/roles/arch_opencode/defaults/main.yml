@@ -4,29 +4,12 @@ arch_opencode_install_bun: false
 
 arch_opencode_profile: ""
 
-arch_opencode_configure_ollama: false
-arch_opencode_config_path: "{{ user_home }}/.config/opencode/opencode.jsonc"
-arch_opencode_config_dir: "{{ arch_opencode_config_path | dirname }}"
-arch_opencode_tui_config_path: "{{ arch_opencode_config_dir }}/tui.jsonc"
-arch_opencode_core_config: {}
-arch_opencode_tui_config: {}
-arch_opencode_plugins: []
-arch_opencode_tui_plugins: []
-arch_opencode_extra_config_files: []
-arch_opencode_enable_lsp_default: false
+arch_opencode_config_dir: "{{ user_home }}/.config/opencode"
+arch_opencode_managed_files:
+  - opencode.jsonc
+  - tui.jsonc
+  - oh-my-opencode-slim.json
+
 arch_opencode_enable_background_subagents: false
 arch_opencode_shell_env: {}
 arch_opencode_shell_env_path: "{{ user_home }}/.bashrc"
-
-arch_opencode_ollama_provider_id: ollama
-arch_opencode_ollama_provider_name: "Ollama (local)"
-arch_opencode_ollama_base_url: "http://127.0.0.1:11434/v1"
-arch_opencode_ollama_models: {}
-arch_opencode_replace_ollama_models: false
-arch_opencode_ollama_context_length: ""
-arch_opencode_ollama_output_limit: 8192
-
-arch_opencode_set_default_model: false
-arch_opencode_model: ""
-
-arch_opencode_small_model: ""

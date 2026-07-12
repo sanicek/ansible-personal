@@ -1,37 +1,16 @@
 # Shared defaults for local playbooks across collections.
 # Keep this file committed for non-secret defaults used by all local runs.
-# Model presets are opt-in; pass -e model_preset=<preset> to apply one.
+# Model presets are opt-in; pass -e model_preset=<preset> to apply one
+# (used by arch_ollama playbook for model selection).
 model_presets:
   qwen35_9b:
     name: "Qwen3.5 9B"
     arch_ollama_models:
       - qwen3.5:9b
     arch_ollama_context_length: "131072"
-    arch_opencode_configure_ollama: true
-    arch_opencode_set_default_model: true
-    arch_opencode_model: "ollama/qwen3.5:9b"
-    arch_opencode_small_model: "ollama/qwen3.5:9b"
-    arch_opencode_ollama_context_length: "131072"
-    arch_opencode_ollama_models:
-      qwen3.5:9b:
-        name: "Qwen3.5 9B (local Ollama)"
-        tool_call: true
-        reasoning: true
-        attachment: true
 
   gemma4_12b:
     name: "Gemma4 12B"
     arch_ollama_models:
       - gemma4:12b
     arch_ollama_context_length: "131072"
-    arch_opencode_configure_ollama: true
-    arch_opencode_set_default_model: true
-    arch_opencode_model: "ollama/gemma4:12b"
-    arch_opencode_small_model: "ollama/gemma4:12b"
-    arch_opencode_ollama_context_length: "131072"
-    arch_opencode_ollama_models:
-      gemma4:12b:
-        name: "Gemma4 12B (local Ollama)"
-        tool_call: true
-        reasoning: true
-        attachment: true

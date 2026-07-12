@@ -2,24 +2,86 @@
 
 Installs opencode from native Arch Linux packages.
 
-Optionally configures a global opencode Ollama provider in `~/.config/opencode/opencode.jsonc`. Existing JSON-compatible config is preserved and merged; comments in that file are not supported by this role's merge step.
+## Profiles
 
-Set `arch_opencode_ollama_context_length` to add a `limit.context` value to each managed Ollama model. Set `arch_opencode_ollama_output_limit` to control the paired `limit.output` value, which defaults to `8192`.
+The role can optionally deploy a static profile to `~/.config/opencode/` by setting `arch_opencode_profile`. Profiles are exact configuration files stored in the role; deployment overwrites the managed files completely. Unknown or sibling files in `~/.config/opencode/` (e.g., state, auth, or manually-created files) are never touched.
 
-Keep `arch_opencode_ollama_context_length` aligned with the Ollama service's `arch_ollama_context_length` unless intentionally testing a lower opencode-side limit.
+Valid profile values:
 
-The role can also apply an opencode profile with `arch_opencode_profile`. Profiles are stored under `vars/profiles/` and may install Bun, register opencode plugins, configure TUI plugins, set shell environment exports, and write plugin-specific config files.
+- `""` (empty / default): Install opencode only. Existing config files in `~/.config/opencode/` are left untouched.
+- `cloud_openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
+- `hybrid_qwen_go`: Multi-provider deployment combining OpenAI orchestration, local Ollama exploration, and opencode-go DeepSeek agents.
 
-`arch_opencode_profile=cloud_openai` installs Bun for npm plugin support, registers `oh-my-opencode-slim@latest`, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP when it is not already configured, and writes an OpenAI preset intended for ChatGPT Plus. It uses GPT-5.6 Sol for orchestration and architecture, GPT-5.5 Fast for research and exploration, and GPT-5.5 Medium for design and implementation.
+An invalid profile name fails early with a message listing the valid values.
 
-`arch_opencode_profile=hybrid_qwen_go` keeps the same plugin, TUI, background-subagent, disabled-agent, and LSP behavior, but writes two runtime-selectable `oh-my-opencode-slim` presets. The active default remains `openai`, copied from `cloud_openai`; switch to `hybrid` in `~/.config/opencode/oh-my-opencode-slim.json` when you want OpenAI orchestration/oracle, local Ollama exploration, and opencode-go DeepSeek librarian/fixer/designer agents to coexist in one deployment. This profile also configures the opencode Ollama provider for exactly `qwen3.5:9b` as `Qwen3.5 9B (local Ollama)` with attachment, reasoning, tool-call, `limit.context=131072`, and `limit.output=8192`, replacing any existing Ollama provider model entries in opencode config.
+### Managed files
 
-Run a profile with:
+Each profile deploys exactly three files:
 
+| File | Purpose |
+|------|---------|
+| `opencode.jsonc` | Core opencode configuration |
+| `tui.jsonc` | OpenCode terminal UI configuration (schema only; OmO plugin is registered in core config) |
+| `oh-my-opencode-slim.json` | Oh-My-OpenCode-Slim plugin configuration |
+
+All managed files are replaced in full on every run. Switching profiles or re-running the same profile eliminates any keys from previous or hand-edited versions because the entire file is overwritten.
+
+The `oh-my-opencode-slim@latest` plugin is registered only in `opencode.jsonc` (core config). OpenCode's plugin system loads core plugins into both the agent runtime and TUI automatically; a separate TUI registration in `tui.jsonc` is not required.
+
+### cloud_openai profile
+
+Installs Bun, deploys `oh-my-opencode-slim@latest` as a core plugin in `opencode.jsonc`, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro.
+
+OmO agents:
+- Orchestrator: `openai/gpt-5.6-sol` (medium)
+- Oracle: `openai/gpt-5.6-sol` (high)
+- Librarian: `openai/gpt-5.5` (fast) — MCPs: websearch, context7, gh_grep
+- Explorer: `openai/gpt-5.5` (fast)
+- Designer: `openai/gpt-5.5` (medium)
+- Fixer: `openai/gpt-5.5` (medium)
+
+### hybrid_qwen_go profile
+
+Same plugin and background-subagent setup as `cloud_openai`, plus an opencode Ollama provider configuration for `qwen3.5:9b` with attachment, reasoning, tool-call, 131072 context limit, and 8192 output limit. Deploys two OmO presets: `openai` (identical to `cloud_openai`) and `hybrid`.
+
+Hybrid OmO agents:
+- Orchestrator: `openai/gpt-5.6-sol` (medium)
+- Oracle: `openai/gpt-5.6-sol` (high)
+- Librarian: `opencode-go/deepseek-v4-flash` — MCPs: websearch, context7, gh_grep
+- Explorer: `ollama/qwen3.5:9b`
+- Designer: `opencode-go/deepseek-v4-pro` (max)
+- Fixer: `opencode-go/deepseek-v4-pro` (max)
+
+Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
+
+### Auto-update and versioning
+
+`oh-my-opencode-slim@latest` is pinned as `@latest` in plugin references, and OmO `autoUpdate` is enabled. The role does not pin or disable updates — the plugin fetches the latest compatible version at runtime.
+
+### Authentication and secrets
+
+This role does not manage API keys, login credentials, or provider authentication. After applying a profile, authenticate interactively:
+- `opencode auth login` for ChatGPT Plus/Pro
+- `opencode models --refresh` to update the subscription model list
+- For `hybrid_qwen_go` with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b`)
+
+## Usage
+
+Install opencode only (no config changes):
+```bash
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
+```
+
+Apply a profile:
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_openai
-# or
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen_go
 ```
 
-After applying either profile, authenticate interactively with `opencode auth login`, select ChatGPT Plus/Pro, and refresh the subscription model list with `opencode models --refresh`. For `hybrid_qwen_go`, also install/start Ollama separately and pull the exact local model with `ollama pull qwen3.5:9b`; opencode-go provider authentication must be configured outside this role before selecting the `hybrid` preset.
+## Overwrite semantics
+
+The role only writes the three managed files listed above. It never removes files from `~/.config/opencode/`. Switching profiles replaces managed files with the new profile's versions; switching back to no profile (`arch_opencode_profile=""`) leaves the previously-deployed managed files in place.
+
+Shell environment configuration (e.g., `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS`) is only written to `.bashrc` when a profile is selected. Install-only runs do not touch `.bashrc` or any config files.
+
+Re-running the same profile is safe and idempotent (the same file content is deployed each time).
