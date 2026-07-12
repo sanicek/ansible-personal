@@ -76,6 +76,40 @@
         "skills": [],
         "mcps": []
       }
+    },
+    "superbudget": {
+      "orchestrator": {
+        "model": "opencode-go/deepseek-v4-flash",
+        "variant": "max",
+        "skills": ["*"],
+        "mcps": []
+      },
+      "oracle": {
+        "model": "opencode-go/deepseek-v4-pro",
+        "variant": "max",
+        "skills": ["simplify"],
+        "mcps": []
+      },
+      "librarian": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": ["websearch", "context7", "gh_grep"]
+      },
+      "explorer": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": []
+      },
+      "designer": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": []
+      },
+      "fixer": {
+        "model": "ollama/qwen3.6:35b",
+        "skills": [],
+        "mcps": []
+      }
     }
   }
 }

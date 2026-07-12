@@ -293,6 +293,23 @@
           - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].limit.output == 8192
           - arch_opencode_profile_core.agent.title.model == 'opencode-go/deepseek-v4-flash'
           - arch_opencode_profile_core.agent.title.variant is not defined
+          - arch_opencode_profile_slim.presets.superbudget.orchestrator.model == 'opencode-go/deepseek-v4-flash'
+          - arch_opencode_profile_slim.presets.superbudget.orchestrator.variant == 'max'
+          - arch_opencode_profile_slim.presets.superbudget.orchestrator.skills == ['*']
+          - arch_opencode_profile_slim.presets.superbudget.orchestrator.mcps == []
+          - arch_opencode_profile_slim.presets.superbudget.oracle.model == 'opencode-go/deepseek-v4-pro'
+          - arch_opencode_profile_slim.presets.superbudget.oracle.variant == 'max'
+          - arch_opencode_profile_slim.presets.superbudget.oracle.skills == ['simplify']
+          - arch_opencode_profile_slim.presets.superbudget.oracle.mcps == []
+          - arch_opencode_profile_slim.presets.superbudget.librarian.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.librarian.variant is not defined
+          - arch_opencode_profile_slim.presets.superbudget.librarian.mcps == ['websearch', 'context7', 'gh_grep']
+          - arch_opencode_profile_slim.presets.superbudget.explorer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.explorer.variant is not defined
+          - arch_opencode_profile_slim.presets.superbudget.designer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.designer.variant is not defined
+          - arch_opencode_profile_slim.presets.superbudget.fixer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.fixer.variant is not defined
       when: arch_opencode_profile == 'hybrid_qwen35b_go'
 
     # --- Stale-key removal verification on TUI and OmO configs ---
