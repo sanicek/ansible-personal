@@ -185,10 +185,10 @@
       when: arch_opencode_profile == 'hybrid_qwen_go'
 
     # --- Stale-key removal verification on TUI and OmO configs ---
-    - name: Assert stale TUI plugin removed on hybrid profile
+    - name: Assert stale TUI plugin replaced by exact managed list on hybrid profile
       ansible.builtin.assert:
         that:
-          - "'plugin' not in arch_opencode_profile_tui"
+          - arch_opencode_profile_tui.plugin == ['oh-my-opencode-slim@latest']
       when: arch_opencode_profile == 'hybrid_qwen_go'
 
     - name: Assert stale OmO config fully replaced on hybrid profile

@@ -21,16 +21,14 @@ Each profile deploys exactly three files:
 | File | Purpose |
 |------|---------|
 | `opencode.jsonc` | Core opencode configuration |
-| `tui.jsonc` | OpenCode terminal UI configuration (schema only; OmO plugin is registered in core config) |
+| `tui.jsonc` | OpenCode terminal UI configuration (OmO plugin registered for TUI extensions) |
 | `oh-my-opencode-slim.json` | Oh-My-OpenCode-Slim plugin configuration |
 
 All managed files are replaced in full on every run. Switching profiles or re-running the same profile eliminates any keys from previous or hand-edited versions because the entire file is overwritten.
 
-The `oh-my-opencode-slim@latest` plugin is registered only in `opencode.jsonc` (core config). OpenCode's plugin system loads core plugins into both the agent runtime and TUI automatically; a separate TUI registration in `tui.jsonc` is not required.
-
 ### cloud_openai profile
 
-Installs Bun, deploys `oh-my-opencode-slim@latest` as a core plugin in `opencode.jsonc`, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro.
+Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro.
 
 OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
