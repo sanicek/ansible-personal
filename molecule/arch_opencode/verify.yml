@@ -142,6 +142,7 @@
       ansible.builtin.assert:
         that:
           - hostvars['cloud-profile'].arch_opencode_profile_slim.presets.openai == hostvars['hybrid-profile'].arch_opencode_profile_slim.presets.openai
+          - hostvars['cloud-profile'].arch_opencode_profile_slim.presets.openai == hostvars['hybrid-35b-profile'].arch_opencode_profile_slim.presets.openai
       delegate_to: cloud-profile
       run_once: true
 
@@ -183,6 +184,34 @@
           - "'stale-model:latest' not in arch_opencode_profile_core.provider.ollama.models"
           - arch_opencode_profile_core.provider['seeded-other'] is not defined
       when: arch_opencode_profile == 'hybrid_qwen_go'
+
+    - name: Assert hybrid Qwen 35B profile configuration
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_slim.presets.hybrid.orchestrator.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.hybrid.orchestrator.variant == 'medium'
+          - arch_opencode_profile_slim.presets.hybrid.oracle.model == 'openai/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.hybrid.oracle.variant == 'high'
+          - arch_opencode_profile_slim.presets.hybrid.librarian.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.hybrid.librarian.variant is not defined
+          - arch_opencode_profile_slim.presets.hybrid.librarian.mcps == ['websearch', 'context7', 'gh_grep']
+          - arch_opencode_profile_slim.presets.hybrid.explorer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.hybrid.explorer.variant is not defined
+          - arch_opencode_profile_slim.presets.hybrid.fixer.model == 'opencode-go/deepseek-v4-pro'
+          - arch_opencode_profile_slim.presets.hybrid.fixer.variant == 'max'
+          - arch_opencode_profile_slim.presets.hybrid.designer.model == 'opencode-go/deepseek-v4-pro'
+          - arch_opencode_profile_slim.presets.hybrid.designer.variant == 'max'
+          - arch_opencode_profile_core.provider.ollama.npm == '@ai-sdk/openai-compatible'
+          - arch_opencode_profile_core.provider.ollama.name == 'Ollama (local)'
+          - arch_opencode_profile_core.provider.ollama.options.baseURL == 'http://127.0.0.1:11434/v1'
+          - (arch_opencode_profile_core.provider.ollama.models.keys() | list | sort) == ['qwen3.6:35b']
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].name == 'Qwen3.6 35B (local Ollama)'
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].attachment
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].reasoning
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].tool_call
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].limit.context == 131072
+          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].limit.output == 8192
+      when: arch_opencode_profile == 'hybrid_qwen35b_go'
 
     # --- Stale-key removal verification on TUI and OmO configs ---
     - name: Assert stale TUI plugin replaced by exact managed list on hybrid profile

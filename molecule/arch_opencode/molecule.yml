@@ -27,6 +27,13 @@ platforms:
     command: /usr/bin/sleep infinity
     groups:
       - local
+  - name: hybrid-35b-profile
+    dockerfile: Dockerfile.j2
+    image: docker.io/archlinux:latest
+    pre_build_image: false
+    command: /usr/bin/sleep infinity
+    groups:
+      - local
 provisioner:
   name: ansible
   env:
@@ -52,6 +59,11 @@ provisioner:
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
         arch_opencode_profile: hybrid_qwen_go
+      hybrid-35b-profile:
+        ansible_become_method: sudo
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: molecule
+        arch_opencode_profile: hybrid_qwen35b_go
 scenario:
   test_sequence:
     - dependency

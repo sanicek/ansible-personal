@@ -11,6 +11,7 @@ Valid profile values:
 - `""` (empty / default): Install opencode only. Existing config files in `~/.config/opencode/` are left untouched.
 - `cloud_openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
 - `hybrid_qwen_go`: Multi-provider deployment combining OpenAI orchestration, local Ollama exploration, and opencode-go DeepSeek agents.
+- `hybrid_qwen35b_go`: Multi-provider deployment using local Qwen3.6 35B for exploration and library research, OpenAI orchestration, and opencode-go DeepSeek implementation agents.
 
 An invalid profile name fails early with a message listing the valid values.
 
@@ -52,6 +53,18 @@ Hybrid OmO agents:
 
 Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
 
+### hybrid_qwen35b_go profile
+
+Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b`. Its hybrid preset assigns the local model to both Librarian and Explorer.
+
+Hybrid OmO agents:
+- Orchestrator: `openai/gpt-5.6-sol` (medium)
+- Oracle: `openai/gpt-5.6-sol` (high)
+- Librarian: `ollama/qwen3.6:35b` — MCPs: websearch, context7, gh_grep
+- Explorer: `ollama/qwen3.6:35b`
+- Designer: `opencode-go/deepseek-v4-pro` (max)
+- Fixer: `opencode-go/deepseek-v4-pro` (max)
+
 ### Auto-update and versioning
 
 `oh-my-opencode-slim@latest` is pinned as `@latest` in plugin references, and OmO `autoUpdate` is enabled. The role does not pin or disable updates — the plugin fetches the latest compatible version at runtime.
@@ -61,7 +74,7 @@ Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
 This role does not manage API keys, login credentials, or provider authentication. After applying a profile, authenticate interactively:
 - `opencode auth login` for ChatGPT Plus/Pro
 - `opencode models --refresh` to update the subscription model list
-- For `hybrid_qwen_go` with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b`)
+- For either hybrid profile with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b` or `ollama pull qwen3.6:35b`, matching the selected profile)
 
 ## Usage
 
@@ -74,6 +87,7 @@ Apply a profile:
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_openai
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen_go
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen35b_go
 ```
 
 ## Overwrite semantics
