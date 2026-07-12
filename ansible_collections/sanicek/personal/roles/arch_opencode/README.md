@@ -27,9 +27,19 @@ Each profile deploys exactly three files:
 
 All managed files are replaced in full on every run. Switching profiles or re-running the same profile eliminates any keys from previous or hand-edited versions because the entire file is overwritten.
 
+### Title agent (OpenCode core)
+
+The `title` agent in `opencode.jsonc` is an OpenCode core hidden agent that generates conversation titles from the first user message. It is **not** part of Oh-My-OpenCode-Slim — it runs directly through OpenCode's built-in agent system. The built-in title agent is already hidden by OpenCode, so no `hidden` field is needed; each profile only overrides the model (and optionally variant) for fast title generation.
+
+| Profile | Title model | Variant |
+|---------|-------------|---------|
+| `cloud_openai` | `openai/gpt-5.5` | `fast` |
+| `hybrid_qwen_go` | `opencode-go/deepseek-v4-flash` | _none_ |
+| `hybrid_qwen35b_go` | `opencode-go/deepseek-v4-flash` | _none_ |
+
 ### cloud_openai profile
 
-Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro.
+Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro. Title generation uses `openai/gpt-5.5` with the `fast` variant.
 
 OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
@@ -41,7 +51,7 @@ OmO agents:
 
 ### hybrid_qwen_go profile
 
-Same plugin and background-subagent setup as `cloud_openai`, plus an opencode Ollama provider configuration for `qwen3.5:9b` with attachment, reasoning, tool-call, 131072 context limit, and 8192 output limit. Deploys two OmO presets: `openai` (identical to `cloud_openai`) and `hybrid`.
+Same plugin and background-subagent setup as `cloud_openai`, plus an opencode Ollama provider configuration for `qwen3.5:9b` with attachment, reasoning, tool-call, 131072 context limit, and 8192 output limit. Deploys two OmO presets: `openai` (identical to `cloud_openai`) and `hybrid`. Title generation uses `opencode-go/deepseek-v4-flash`.
 
 Hybrid OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
@@ -55,7 +65,7 @@ Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
 
 ### hybrid_qwen35b_go profile
 
-Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b` and selects `hybrid` by default. Its hybrid preset assigns the local model to both Librarian and Explorer.
+Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b` and selects `hybrid` by default. Its hybrid preset assigns the local model to both Librarian and Explorer. Title generation uses `opencode-go/deepseek-v4-flash`.
 
 Hybrid OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
