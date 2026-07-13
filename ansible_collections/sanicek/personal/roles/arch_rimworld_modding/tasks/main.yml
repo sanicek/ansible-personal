@@ -1,0 +1,28 @@
+- name: Install RimWorld mod development packages
+  community.general.pacman:
+    name: "{{ arch_rimworld_modding_packages }}"
+    state: present
+
+- name: Ensure RimWorld mod build helper directory exists
+  ansible.builtin.file:
+    path: "{{ arch_rimworld_modding_helper_path | dirname }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_rimworld_modding_install_helper
+
+- name: Install RimWorld mod build helper
+  ansible.builtin.copy:
+    dest: "{{ arch_rimworld_modding_helper_path }}"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      exec dotnet build --configuration Release {{ ('-p:FrameworkPathOverride=' ~ arch_rimworld_modding_framework_path) | quote }} "$@"
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_rimworld_modding_install_helper
