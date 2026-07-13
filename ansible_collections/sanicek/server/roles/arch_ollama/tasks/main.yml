@@ -111,10 +111,12 @@
 
 - name: Persist base model digests
   ansible.builtin.copy:
-    content: "{{ _ollama_base_show.results[ansible_loop.index0].stdout }}"
+    content: "{{ _ollama_base_show.results[_di].stdout }}"
     dest: "/etc/ollama/modelfiles/{{ item.name }}.base-digest"
     mode: "0644"
   loop: "{{ arch_ollama_custom_models }}"
+  loop_control:
+    index_var: _di
   register: _ollama_digest
   when: arch_ollama_custom_models | length > 0
 
@@ -133,4 +135,4 @@
     - arch_ollama_custom_models | length > 0
     - _ollama_modelfile.results[_i].changed
       or _ollama_digest.results[_i].changed
-      or _ollama_custom_local.stdout is not search('(^|\n)' ~ (item.name | regex_escape) ~ '\s')
+      or _ollama_custom_local.stdout is not search('(^|\n)' ~ (item.name | regex_escape) ~ '[:\s]')
