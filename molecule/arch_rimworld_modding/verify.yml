@@ -1,0 +1,83 @@
+- name: Verify Arch RimWorld mod development toolchain
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check RimWorld mod development packages
+      ansible.builtin.command: pacman -Q dotnet-sdk mono
+      register: arch_rimworld_modding_packages
+      changed_when: false
+
+    - name: Check toolchain binaries and framework reference path
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/bin/dotnet
+        - /usr/bin/mono
+        - /usr/lib/mono/4.7.2-api
+      register: arch_rimworld_modding_toolchain_paths
+
+    - name: Check RimWorld mod build helper
+      ansible.builtin.stat:
+        path: /home/molecule/.local/bin/rimworld-mod-build
+      register: arch_rimworld_modding_helper
+
+    - name: Read RimWorld mod build helper
+      ansible.builtin.slurp:
+        path: /home/molecule/.local/bin/rimworld-mod-build
+      register: arch_rimworld_modding_helper_content
+
+    - name: Verify RimWorld mod build helper argument forwarding
+      block:
+        - name: Create temporary fake dotnet directory
+          ansible.builtin.tempfile:
+            state: directory
+            suffix: rimworld-mod-build
+          register: arch_rimworld_modding_fake_dotnet_dir
+
+        - name: Install fake dotnet argument recorder
+          ansible.builtin.copy:
+            dest: "{{ arch_rimworld_modding_fake_dotnet_dir.path }}/dotnet"
+            content: |
+              #!/usr/bin/env bash
+              printf '<%s>\n' "$@" > "$FAKE_DOTNET_ARGS"
+            mode: "0755"
+
+        - name: Run RimWorld mod build helper with caller arguments
+          ansible.builtin.command:
+            argv:
+              - /home/molecule/.local/bin/rimworld-mod-build
+              - /tmp/RimWorld Mod/My Mod.csproj
+              - --no-restore
+              - --configuration
+              - Debug
+          environment:
+            FAKE_DOTNET_ARGS: "{{ arch_rimworld_modding_fake_dotnet_dir.path }}/arguments"
+            PATH: "{{ arch_rimworld_modding_fake_dotnet_dir.path }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          changed_when: false
+
+        - name: Read recorded RimWorld mod build helper arguments
+          ansible.builtin.slurp:
+            path: "{{ arch_rimworld_modding_fake_dotnet_dir.path }}/arguments"
+          register: arch_rimworld_modding_helper_arguments
+      always:
+        - name: Remove temporary fake dotnet directory
+          ansible.builtin.file:
+            path: "{{ arch_rimworld_modding_fake_dotnet_dir.path }}"
+            state: absent
+          when: arch_rimworld_modding_fake_dotnet_dir is defined
+
+    - name: Assert expected RimWorld mod development toolchain behavior
+      ansible.builtin.assert:
+        that:
+          - "'dotnet-sdk' in arch_rimworld_modding_packages.stdout"
+          - "'mono' in arch_rimworld_modding_packages.stdout"
+          - arch_rimworld_modding_toolchain_paths.results | map(attribute='stat.exists') | min
+          - arch_rimworld_modding_helper.stat.exists
+          - arch_rimworld_modding_helper.stat.executable
+          - "'exec dotnet build --configuration Release' in (arch_rimworld_modding_helper_content.content | b64decode)"
+          - "'-p:FrameworkPathOverride=/usr/lib/mono/4.7.2-api' in (arch_rimworld_modding_helper_content.content | b64decode)"
+          - "'\"$@\"' in (arch_rimworld_modding_helper_content.content | b64decode)"
+          - >-
+            (arch_rimworld_modding_helper_arguments.content | b64decode).splitlines() ==
+            ['<build>', '<--configuration>', '<Release>', '<-p:FrameworkPathOverride=/usr/lib/mono/4.7.2-api>',
+            '</tmp/RimWorld Mod/My Mod.csproj>', '<--no-restore>', '<--configuration>', '<Debug>']

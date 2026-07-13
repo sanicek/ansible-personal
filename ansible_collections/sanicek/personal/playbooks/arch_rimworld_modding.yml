@@ -1,0 +1,6 @@
+- name: Install Arch RimWorld mod development toolchain
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_rimworld_modding

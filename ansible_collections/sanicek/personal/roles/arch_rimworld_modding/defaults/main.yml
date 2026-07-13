@@ -1,0 +1,7 @@
+arch_rimworld_modding_packages:
+  - dotnet-sdk
+  - mono
+
+arch_rimworld_modding_framework_path: /usr/lib/mono/4.7.2-api
+arch_rimworld_modding_install_helper: true
+arch_rimworld_modding_helper_path: "{{ user_home }}/.local/bin/rimworld-mod-build"
