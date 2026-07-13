@@ -85,3 +85,52 @@
   ansible.builtin.command: "ollama pull {{ item }}"
   loop: "{{ arch_ollama_models }}"
   when: arch_ollama_local_models.stdout is not search('(^|\n)' ~ (item | regex_escape) ~ '\s')
+
+- name: Ensure custom model directory exists
+  ansible.builtin.file:
+    path: /etc/ollama/modelfiles
+    state: directory
+    mode: "0755"
+  when: arch_ollama_custom_models | length > 0
+
+- name: Capture base model metadata for custom models
+  ansible.builtin.command: "ollama show {{ item.base }}"
+  loop: "{{ arch_ollama_custom_models }}"
+  register: _ollama_base_show
+  changed_when: false
+  when: arch_ollama_custom_models | length > 0
+
+- name: Template custom model Modelfiles
+  ansible.builtin.template:
+    src: modelfile.j2
+    dest: "/etc/ollama/modelfiles/{{ item.name }}.Modelfile"
+    mode: "0644"
+  loop: "{{ arch_ollama_custom_models }}"
+  register: _ollama_modelfile
+  when: arch_ollama_custom_models | length > 0
+
+- name: Persist base model digests
+  ansible.builtin.copy:
+    content: "{{ _ollama_base_show.results[ansible_loop.index0].stdout }}"
+    dest: "/etc/ollama/modelfiles/{{ item.name }}.base-digest"
+    mode: "0644"
+  loop: "{{ arch_ollama_custom_models }}"
+  register: _ollama_digest
+  when: arch_ollama_custom_models | length > 0
+
+- name: List local Ollama models for custom model check
+  ansible.builtin.command: ollama list
+  register: _ollama_custom_local
+  changed_when: false
+  when: arch_ollama_custom_models | length > 0
+
+- name: Build custom Ollama models
+  ansible.builtin.command: "ollama create {{ item.name }} -f /etc/ollama/modelfiles/{{ item.name }}.Modelfile"
+  loop: "{{ arch_ollama_custom_models }}"
+  loop_control:
+    index_var: _i
+  when:
+    - arch_ollama_custom_models | length > 0
+    - _ollama_modelfile.results[_i].changed
+      or _ollama_digest.results[_i].changed
+      or _ollama_custom_local.stdout is not search('(^|\n)' ~ (item.name | regex_escape) ~ '\s')

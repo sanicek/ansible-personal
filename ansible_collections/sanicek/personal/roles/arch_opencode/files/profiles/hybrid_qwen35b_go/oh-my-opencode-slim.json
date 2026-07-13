@@ -55,12 +55,12 @@
         "mcps": []
       },
       "librarian": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": ["websearch", "context7", "gh_grep"]
       },
       "explorer": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": []
       },
@@ -91,12 +91,12 @@
         "mcps": []
       },
       "librarian": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": ["websearch", "context7", "gh_grep"]
       },
       "explorer": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": []
       },
@@ -127,22 +127,22 @@
         "mcps": []
       },
       "librarian": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": ["websearch", "context7", "gh_grep"]
       },
       "explorer": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": []
       },
       "designer": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": []
       },
       "fixer": {
-        "model": "ollama/qwen3.6:35b",
+        "model": "ollama/qwen-agent",
         "skills": [],
         "mcps": []
       }

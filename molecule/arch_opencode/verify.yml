@@ -272,10 +272,10 @@
           - arch_opencode_profile_slim.presets.hybrid.orchestrator.variant == 'medium'
           - arch_opencode_profile_slim.presets.hybrid.oracle.model == 'openai/gpt-5.6-sol'
           - arch_opencode_profile_slim.presets.hybrid.oracle.variant == 'high'
-          - arch_opencode_profile_slim.presets.hybrid.librarian.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.hybrid.librarian.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.hybrid.librarian.variant is not defined
           - arch_opencode_profile_slim.presets.hybrid.librarian.mcps == ['websearch', 'context7', 'gh_grep']
-          - arch_opencode_profile_slim.presets.hybrid.explorer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.hybrid.explorer.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.hybrid.explorer.variant is not defined
           - arch_opencode_profile_slim.presets.hybrid.fixer.model == 'opencode-go/deepseek-v4-pro'
           - arch_opencode_profile_slim.presets.hybrid.fixer.variant == 'max'
@@ -284,13 +284,13 @@
           - arch_opencode_profile_core.provider.ollama.npm == '@ai-sdk/openai-compatible'
           - arch_opencode_profile_core.provider.ollama.name == 'Ollama (local)'
           - arch_opencode_profile_core.provider.ollama.options.baseURL == 'http://127.0.0.1:11434/v1'
-          - (arch_opencode_profile_core.provider.ollama.models.keys() | list | sort) == ['qwen3.6:35b']
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].name == 'Qwen3.6 35B (local Ollama)'
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].attachment
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].reasoning
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].tool_call
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].limit.context == 131072
-          - arch_opencode_profile_core.provider.ollama.models['qwen3.6:35b'].limit.output == 8192
+          - (arch_opencode_profile_core.provider.ollama.models.keys() | list | sort) == ['qwen-agent']
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].name == 'Qwen Agent (local Ollama)'
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].attachment
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].reasoning
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].tool_call
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].limit.context == 131072
+          - arch_opencode_profile_core.provider.ollama.models['qwen-agent'].limit.output == 8192
           - arch_opencode_profile_core.agent.title.model == 'opencode-go/deepseek-v4-flash'
           - arch_opencode_profile_core.agent.title.variant is not defined
           - arch_opencode_profile_slim.presets.superbudget.orchestrator.model == 'opencode-go/deepseek-v4-flash'
@@ -301,14 +301,14 @@
           - arch_opencode_profile_slim.presets.superbudget.oracle.variant == 'max'
           - arch_opencode_profile_slim.presets.superbudget.oracle.skills == ['simplify']
           - arch_opencode_profile_slim.presets.superbudget.oracle.mcps == []
-          - arch_opencode_profile_slim.presets.superbudget.librarian.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.librarian.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.superbudget.librarian.variant is not defined
           - arch_opencode_profile_slim.presets.superbudget.librarian.mcps == ['websearch', 'context7', 'gh_grep']
-          - arch_opencode_profile_slim.presets.superbudget.explorer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.explorer.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.superbudget.explorer.variant is not defined
-          - arch_opencode_profile_slim.presets.superbudget.designer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.designer.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.superbudget.designer.variant is not defined
-          - arch_opencode_profile_slim.presets.superbudget.fixer.model == 'ollama/qwen3.6:35b'
+          - arch_opencode_profile_slim.presets.superbudget.fixer.model == 'ollama/qwen-agent'
           - arch_opencode_profile_slim.presets.superbudget.fixer.variant is not defined
       when: arch_opencode_profile == 'hybrid_qwen35b_go'
 

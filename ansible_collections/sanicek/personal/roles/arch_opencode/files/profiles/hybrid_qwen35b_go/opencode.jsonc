@@ -21,8 +21,8 @@
         "baseURL": "http://127.0.0.1:11434/v1"
       },
       "models": {
-        "qwen3.6:35b": {
-          "name": "Qwen3.6 35B (local Ollama)",
+        "qwen-agent": {
+          "name": "Qwen Agent (local Ollama)",
           "attachment": true,
           "reasoning": true,
           "tool_call": true,
