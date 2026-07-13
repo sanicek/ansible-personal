@@ -44,12 +44,12 @@ The `title` agent in `opencode.jsonc` is an OpenCode core hidden agent that gene
 Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro. Title generation uses `openai/gpt-5.5` with the `fast` variant.
 
 OmO agents:
-- Orchestrator: `openai/gpt-5.6-sol` (medium)
+- Orchestrator: `openai/gpt-5.6-sol-fast`
 - Oracle: `openai/gpt-5.6-sol` (high)
-- Librarian: `openai/gpt-5.5` (fast) — MCPs: websearch, context7, gh_grep
-- Explorer: `openai/gpt-5.5` (fast)
-- Designer: `openai/gpt-5.5` (medium)
-- Fixer: `openai/gpt-5.5` (medium)
+- Librarian: `openai/gpt-5.3-codex-spark` — MCPs: websearch, context7, gh_grep
+- Explorer: `openai/gpt-5.3-codex-spark`
+- Designer: `openai/gpt-5.6-terra`
+- Fixer: `openai/gpt-5.6-terra`
 
 ### cloud_copilot profile
 

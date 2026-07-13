@@ -5,8 +5,7 @@
   "presets": {
     "openai": {
       "orchestrator": {
-        "model": "openai/gpt-5.6-sol",
-        "variant": "medium",
+        "model": "openai/gpt-5.6-sol-fast",
         "skills": ["*"],
         "mcps": []
       },
@@ -17,26 +16,22 @@
         "mcps": []
       },
       "librarian": {
-        "model": "openai/gpt-5.5",
-        "variant": "fast",
+        "model": "openai/gpt-5.3-codex-spark",
         "skills": [],
         "mcps": ["websearch", "context7", "gh_grep"]
       },
       "explorer": {
-        "model": "openai/gpt-5.5",
-        "variant": "fast",
+        "model": "openai/gpt-5.3-codex-spark",
         "skills": [],
         "mcps": []
       },
       "designer": {
-        "model": "openai/gpt-5.5",
-        "variant": "medium",
+        "model": "openai/gpt-5.6-terra",
         "skills": [],
         "mcps": []
       },
       "fixer": {
-        "model": "openai/gpt-5.5",
-        "variant": "medium",
+        "model": "openai/gpt-5.6-terra",
         "skills": [],
         "mcps": []
       }

@@ -167,18 +167,18 @@
       ansible.builtin.assert:
         that:
           - arch_opencode_profile_slim.preset == ('hybrid' if arch_opencode_profile == 'hybrid_qwen35b_go' else 'openai')
-          - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol'
-          - arch_opencode_profile_slim.presets.openai.orchestrator.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol-fast'
+          - arch_opencode_profile_slim.presets.openai.orchestrator.variant is not defined
           - arch_opencode_profile_slim.presets.openai.oracle.model == 'openai/gpt-5.6-sol'
           - arch_opencode_profile_slim.presets.openai.oracle.variant == 'high'
-          - arch_opencode_profile_slim.presets.openai.librarian.model == 'openai/gpt-5.5'
-          - arch_opencode_profile_slim.presets.openai.librarian.variant == 'fast'
-          - arch_opencode_profile_slim.presets.openai.explorer.model == 'openai/gpt-5.5'
-          - arch_opencode_profile_slim.presets.openai.explorer.variant == 'fast'
-          - arch_opencode_profile_slim.presets.openai.designer.model == 'openai/gpt-5.5'
-          - arch_opencode_profile_slim.presets.openai.designer.variant == 'medium'
-          - arch_opencode_profile_slim.presets.openai.fixer.model == 'openai/gpt-5.5'
-          - arch_opencode_profile_slim.presets.openai.fixer.variant == 'medium'
+          - arch_opencode_profile_slim.presets.openai.librarian.model == 'openai/gpt-5.3-codex-spark'
+          - arch_opencode_profile_slim.presets.openai.librarian.variant is not defined
+          - arch_opencode_profile_slim.presets.openai.explorer.model == 'openai/gpt-5.3-codex-spark'
+          - arch_opencode_profile_slim.presets.openai.explorer.variant is not defined
+          - arch_opencode_profile_slim.presets.openai.designer.model == 'openai/gpt-5.6-terra'
+          - arch_opencode_profile_slim.presets.openai.designer.variant is not defined
+          - arch_opencode_profile_slim.presets.openai.fixer.model == 'openai/gpt-5.6-terra'
+          - arch_opencode_profile_slim.presets.openai.fixer.variant is not defined
       when:
         - arch_opencode_profile | length > 0
         - arch_opencode_profile != 'cloud_copilot'
