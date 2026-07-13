@@ -159,6 +159,13 @@
           - arch_opencode_profile_core.agent.title.model is defined and arch_opencode_profile_core.agent.title.model | length > 0
           - arch_opencode_profile_core.lsp
           - arch_opencode_profile_slim.autoUpdate
+          - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
+      when: arch_opencode_profile | length > 0
+
+    # --- Non-copilot OpenAI preset assertions ---
+    - name: Assert OpenAI preset on non-copilot profiles
+      ansible.builtin.assert:
+        that:
           - arch_opencode_profile_slim.preset == ('hybrid' if arch_opencode_profile == 'hybrid_qwen35b_go' else 'openai')
           - arch_opencode_profile_slim.presets.openai.orchestrator.model == 'openai/gpt-5.6-sol'
           - arch_opencode_profile_slim.presets.openai.orchestrator.variant == 'medium'
@@ -172,8 +179,48 @@
           - arch_opencode_profile_slim.presets.openai.designer.variant == 'medium'
           - arch_opencode_profile_slim.presets.openai.fixer.model == 'openai/gpt-5.5'
           - arch_opencode_profile_slim.presets.openai.fixer.variant == 'medium'
-          - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in arch_opencode_profile_bashrc_text"
-      when: arch_opencode_profile | length > 0
+      when:
+        - arch_opencode_profile | length > 0
+        - arch_opencode_profile != 'cloud_copilot'
+
+    # --- Copilot-specific assertions ---
+    - name: Assert Copilot profile configuration
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_profile_slim.preset == 'copilot'
+          # presets contains exactly one entry named 'copilot'
+          - (arch_opencode_profile_slim.presets.keys() | list | sort) == ['copilot']
+          # copilot preset contains exactly the six intended agents
+          - (arch_opencode_profile_slim.presets.copilot.keys() | list | sort) == ['designer', 'explorer', 'fixer', 'librarian', 'oracle', 'orchestrator']
+          - arch_opencode_profile_slim.presets.copilot.orchestrator.model == 'github-copilot/gpt-5.6-sol'
+          - arch_opencode_profile_slim.presets.copilot.orchestrator.variant == 'high'
+          - arch_opencode_profile_slim.presets.copilot.oracle.model == 'github-copilot/claude-sonnet-5'
+          - arch_opencode_profile_slim.presets.copilot.oracle.variant == 'high'
+          - arch_opencode_profile_slim.presets.copilot.librarian.model == 'github-copilot/gpt-5-mini'
+          - arch_opencode_profile_slim.presets.copilot.librarian.variant == 'low'
+          - arch_opencode_profile_slim.presets.copilot.explorer.model == 'github-copilot/gemini-3.1-pro'
+          - arch_opencode_profile_slim.presets.copilot.explorer.variant == 'low'
+          - arch_opencode_profile_slim.presets.copilot.designer.model == 'github-copilot/gemini-3.1-pro'
+          - arch_opencode_profile_slim.presets.copilot.designer.variant == 'high'
+          - arch_opencode_profile_slim.presets.copilot.fixer.model == 'github-copilot/claude-sonnet-5'
+          - arch_opencode_profile_slim.presets.copilot.fixer.variant == 'medium'
+          - arch_opencode_profile_core.enabled_providers == ['github-copilot']
+          - arch_opencode_profile_core.provider is not defined
+          - arch_opencode_profile_slim.presets.openai is not defined
+          - arch_opencode_profile_slim.presets.hybrid is not defined
+          - arch_opencode_profile_core.agent.title.model == 'github-copilot/raptor-mini'
+          - arch_opencode_profile_core.agent.title.variant == 'low'
+      when: arch_opencode_profile == 'cloud_copilot'
+
+    # --- All Copilot model strings must be github-copilot/ prefixed ---
+    - name: Assert every OmO agent model in Copilot profile uses github-copilot prefix
+      ansible.builtin.assert:
+        that:
+          - item.value.model is regex('^github-copilot/')
+      loop: "{{ arch_opencode_profile_slim.presets.copilot | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+      when: arch_opencode_profile == 'cloud_copilot'
 
     # --- Orchestrator append assertions ---
     - name: Load expected orchestrator append source

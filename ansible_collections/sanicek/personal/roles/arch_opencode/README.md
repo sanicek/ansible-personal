@@ -4,7 +4,7 @@ Installs opencode from native Arch Linux packages.
 
 ## Profiles
 
-The role can optionally deploy a static profile to `~/.config/opencode/` by setting `arch_opencode_profile`. Profiles are exact configuration files stored in the role; deployment overwrites the managed files completely. Unknown or sibling files in `~/.config/opencode/` (e.g., state, auth, or manually-created files) are never touched.
+The role can optionally deploy a static profile to `~/.config/opencode/` by setting `arch_opencode_profile`. Profiles are exact configuration files stored in the role; deployment overwrites the managed files completely. Unknown or sibling files in `~/.config/opencode/` (e.g., state or manually-created files) are never touched.
 
 Valid profile values:
 
@@ -12,6 +12,7 @@ Valid profile values:
 - `cloud_openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
 - `hybrid_qwen_go`: Multi-provider deployment combining OpenAI orchestration, local Ollama exploration, and opencode-go DeepSeek agents.
 - `hybrid_qwen35b_go`: Multi-provider deployment using local Qwen3.6 35B for exploration and library research, OpenAI orchestration, and opencode-go DeepSeek implementation agents.
+- `cloud_copilot`: GitHub Copilot-only deployment via the built-in `github-copilot` provider. Every model is prefixed `github-copilot/`. No external auth plugin, no role-managed credentials or secrets, and no fallback provider. Authenticate once with `opencode auth login`.
 
 An invalid profile name fails early with a message listing the valid values.
 
@@ -36,6 +37,7 @@ The `title` agent in `opencode.jsonc` is an OpenCode core hidden agent that gene
 | `cloud_openai` | `openai/gpt-5.5` | `fast` |
 | `hybrid_qwen_go` | `opencode-go/deepseek-v4-flash` | _none_ |
 | `hybrid_qwen35b_go` | `opencode-go/deepseek-v4-flash` | _none_ |
+| `cloud_copilot` | `github-copilot/raptor-mini` | `low` |
 
 ### cloud_openai profile
 
@@ -48,6 +50,20 @@ OmO agents:
 - Explorer: `openai/gpt-5.5` (fast)
 - Designer: `openai/gpt-5.5` (medium)
 - Fixer: `openai/gpt-5.5` (medium)
+
+### cloud_copilot profile
+
+Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, restricts `enabled_providers` to `["github-copilot"]`, and writes a Copilot-only OmO preset. Title generation uses `github-copilot/raptor-mini` with the `low` variant.
+
+OmO agents:
+- Orchestrator: `github-copilot/gpt-5.6-sol` (high)
+- Oracle: `github-copilot/claude-sonnet-5` (high)
+- Librarian: `github-copilot/gpt-5-mini` (low) — MCPs: websearch, context7, gh_grep
+- Explorer: `github-copilot/gemini-3.1-pro` (low)
+- Designer: `github-copilot/gemini-3.1-pro` (high)
+- Fixer: `github-copilot/claude-sonnet-5` (medium)
+
+No OpenAI, Ollama, or opencode-go preset/fallback is included. All models are routed exclusively through the built-in `github-copilot` provider. After applying the profile, authenticate once with `opencode auth login`.
 
 ### hybrid_qwen_go profile
 
@@ -106,7 +122,7 @@ Superbudget OmO agents:
 ### Authentication and secrets
 
 This role does not manage API keys, login credentials, or provider authentication. After applying a profile, authenticate interactively:
-- `opencode auth login` for ChatGPT Plus/Pro
+- `opencode auth login` for ChatGPT Plus/Pro or GitHub Copilot
 - `opencode models --refresh` to update the subscription model list
 - For either hybrid profile with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b` or `ollama pull qwen3.6:35b`, matching the selected profile)
 
@@ -128,6 +144,7 @@ Apply a profile:
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_openai
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen_go
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen35b_go
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_copilot
 ```
 
 ## Overwrite semantics
