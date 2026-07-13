@@ -56,6 +56,26 @@
   become: false
   when: arch_opencode_profile | length > 0
 
+- name: Ensure opencode plugins directory exists
+  ansible.builtin.file:
+    path: "{{ arch_opencode_config_dir }}/plugins"
+    state: directory
+    mode: "0755"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_profile | length > 0
+
+- name: Deploy notify plugin
+  ansible.builtin.copy:
+    src: notify.ts
+    dest: "{{ arch_opencode_config_dir }}/plugins/notify.ts"
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_profile | length > 0
+
 - name: Build opencode shell environment
   ansible.builtin.set_fact:
     arch_opencode_effective_shell_env: >-
