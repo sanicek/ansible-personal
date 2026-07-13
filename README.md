@@ -59,31 +59,42 @@ ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 
 ## Validation
 
-Install Podman and local Python tooling prerequisites with the Arch Molecule setup playbook:
+All validation targets require Molecule and Podman. Run these one-time setup steps on each host before first use:
 
-```bash
-ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
-```
+1. **Python tooling** — install `ansible-galaxy`, `ansible-playbook`, and `molecule` into a repository-local virtual environment:
 
-For explicit Fedora maintenance work only, use `ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
+   ```bash
+   python -m venv .venv
+   .venv/bin/python -m pip install -r requirements-dev.txt
+   ```
 
-Install Molecule into a repository-local virtual environment:
+   `scripts/validate.sh` automatically uses `.venv/bin` when it exists, so manual activation (`. .venv/bin/activate`) is optional.
 
-```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install -r requirements-dev.txt
-```
+2. **External collections** — the Podman setup playbook depends on external Ansible collections:
 
-Run the full validation entrypoint from the repository root:
+   ```bash
+   .venv/bin/ansible-galaxy collection install -r requirements.yml -p .ansible/collections
+   ```
+
+3. **Podman host setup** — install and configure Podman via the Arch Molecule playbook:
+
+   ```bash
+   .venv/bin/ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
+   ```
+
+   For explicit Fedora maintenance work only, use `ansible_collections/sanicek/personal/playbooks/fedora_molecule.yml`.
+
+### Full Validation
 
 ```bash
 scripts/validate.sh
 ```
 
-The validation script installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds local collections, and runs Podman-backed Molecule scenarios with idempotence checks. Without arguments it runs full validation.
+Without arguments (or with the `full` alias) the script runs a preflight check, installs external Ansible collections into gitignored `.ansible/collections`, runs playbook syntax checks, builds local collections, and runs Podman-backed Molecule scenarios with idempotence checks.
 
-Focused targets are available when changing one playbook or role family:
+### Focused Validation
+
+When changing a single playbook or role family, use a focused target:
 
 ```bash
 scripts/validate.sh arch_shell
@@ -91,10 +102,11 @@ scripts/validate.sh arch_terminal
 scripts/validate.sh arch_cloud
 scripts/validate.sh arch_k8s
 scripts/validate.sh arch_opencode
-scripts/validate.sh full
 ```
 
-Focused validation commands are still useful while developing:
+### Individual Commands
+
+Useful while developing:
 
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml --syntax-check

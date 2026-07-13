@@ -4,17 +4,34 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Prefer repo-local tooling
+if [ -d "${ROOT_DIR}/.venv/bin" ]; then
+  export PATH="${ROOT_DIR}/.venv/bin:$PATH"
+fi
+
 export ANSIBLE_COLLECTIONS_PATH="${ROOT_DIR}/.ansible/collections:${ROOT_DIR}"
+
+preflight() {
+  local missing=()
+  for cmd in ansible-galaxy ansible-playbook molecule podman; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      missing+=("$cmd")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    printf 'ERROR: Missing required commands: %s\n' "${missing[*]}" >&2
+    printf '\nOne-time setup (required before first validation):\n' >&2
+    printf '  1. python -m venv .venv\n' >&2
+    printf '     .venv/bin/python -m pip install -r requirements-dev.txt\n' >&2
+    printf '  2. .venv/bin/ansible-galaxy collection install -r requirements.yml -p .ansible/collections\n' >&2
+    printf '  3. .venv/bin/ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_molecule.yml\n' >&2
+    exit 1
+  fi
+}
 
 install_dependencies() {
   ansible-galaxy collection install -r requirements.yml -p "${ROOT_DIR}/.ansible/collections"
-}
-
-require_molecule() {
-  if ! command -v molecule >/dev/null 2>&1; then
-    printf 'molecule is not installed. Create a virtualenv and run: pip install -r requirements-dev.txt\n' >&2
-    exit 1
-  fi
 }
 
 syntax_check_playbooks() {
@@ -37,13 +54,13 @@ build_all_collections() {
 run_molecule_scenarios() {
   local scenario
 
-  require_molecule
   for scenario in "$@"; do
     molecule test -s "$scenario"
   done
 }
 
 validate_arch_shell() {
+  preflight
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_shell.yml
   build_personal_collection
@@ -51,6 +68,7 @@ validate_arch_shell() {
 }
 
 validate_arch_terminal() {
+  preflight
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_terminal.yml
   build_personal_collection
@@ -58,6 +76,7 @@ validate_arch_terminal() {
 }
 
 validate_arch_cloud() {
+  preflight
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
   build_personal_collection
@@ -65,6 +84,7 @@ validate_arch_cloud() {
 }
 
 validate_arch_k8s() {
+  preflight
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
   build_personal_collection
@@ -72,6 +92,7 @@ validate_arch_k8s() {
 }
 
 validate_arch_opencode() {
+  preflight
   install_dependencies
   syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
   build_personal_collection
@@ -96,6 +117,7 @@ validate_full() {
     ansible_collections/sanicek/server/playbooks/arch_sshd.yml
   )
 
+  preflight
   install_dependencies
   syntax_check_playbooks "${playbooks[@]}"
   build_all_collections
