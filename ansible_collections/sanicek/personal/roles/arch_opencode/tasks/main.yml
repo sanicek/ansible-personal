@@ -1,8 +1,8 @@
 - name: Validate opencode profile name
   ansible.builtin.assert:
     that:
-      - arch_opencode_profile in ['', 'cloud_openai', 'hybrid_qwen_go', 'hybrid_qwen35b_go']
-    fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Valid profiles: cloud_openai, hybrid_qwen_go, hybrid_qwen35b_go"
+      - arch_opencode_profile in ['', 'cloud_openai', 'hybrid_qwen_go', 'hybrid_qwen35b_go', 'cloud_copilot']
+    fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Valid profiles: cloud_openai, hybrid_qwen_go, hybrid_qwen35b_go, cloud_copilot"
   when: arch_opencode_profile | length > 0
 
 - name: Load opencode profile behavior vars

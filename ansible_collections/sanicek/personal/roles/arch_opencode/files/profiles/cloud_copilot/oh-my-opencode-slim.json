@@ -1,0 +1,45 @@
+{
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
+  "autoUpdate": true,
+  "preset": "copilot",
+  "presets": {
+    "copilot": {
+      "orchestrator": {
+        "model": "github-copilot/gpt-5.6-sol",
+        "variant": "high",
+        "skills": ["*"],
+        "mcps": []
+      },
+      "oracle": {
+        "model": "github-copilot/claude-sonnet-5",
+        "variant": "high",
+        "skills": ["simplify"],
+        "mcps": []
+      },
+      "librarian": {
+        "model": "github-copilot/gpt-5-mini",
+        "variant": "low",
+        "skills": [],
+        "mcps": ["websearch", "context7", "gh_grep"]
+      },
+      "explorer": {
+        "model": "github-copilot/gemini-3.1-pro",
+        "variant": "low",
+        "skills": [],
+        "mcps": []
+      },
+      "designer": {
+        "model": "github-copilot/gemini-3.1-pro",
+        "variant": "high",
+        "skills": [],
+        "mcps": []
+      },
+      "fixer": {
+        "model": "github-copilot/claude-sonnet-5",
+        "variant": "medium",
+        "skills": [],
+        "mcps": []
+      }
+    }
+  }
+}
