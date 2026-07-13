@@ -212,6 +212,34 @@
           - not arch_opencode_append_absent_stat.stat.exists
       when: arch_opencode_profile | length == 0
 
+    # --- Notify plugin deployment checks ---
+    - name: Check notify plugin deployed on configured profiles
+      ansible.builtin.stat:
+        path: /home/molecule/.config/opencode/plugins/notify.ts
+      register: arch_opencode_notify_stat
+      when: arch_opencode_profile | length > 0
+
+    - name: Read deployed notify plugin on configured profiles
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/plugins/notify.ts
+      register: arch_opencode_notify_content
+      when: arch_opencode_profile | length > 0
+
+    - name: Load expected notify plugin source
+      ansible.builtin.set_fact:
+        expected_notify: "{{ lookup('file', playbook_dir ~ '/../../ansible_collections/sanicek/personal/roles/arch_opencode/files/notify.ts', rstrip=false) }}"
+      run_once: true
+
+    - name: Assert notify plugin deployed and matches source on configured profiles
+      ansible.builtin.assert:
+        that:
+          - arch_opencode_notify_stat.stat.exists
+          - arch_opencode_notify_stat.stat.mode == '0644'
+          - arch_opencode_notify_stat.stat.pw_name == 'molecule'
+          - arch_opencode_notify_stat.stat.gr_name == 'molecule'
+          - (arch_opencode_notify_content.content | b64decode) == expected_notify
+      when: arch_opencode_profile | length > 0
+
     # --- Cross-profile OpenAI preset identity check ---
     - name: Assert cloud and hybrid OpenAI presets stay identical
       ansible.builtin.assert:
