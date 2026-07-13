@@ -3,7 +3,7 @@
   "agents": {
     "validator": {
       "model": [
-        "ollama/qwen3.6:35b",
+        "ollama/qwen-agent",
         {
           "id": "opencode-go/deepseek-v4-pro",
           "variant": "max"
