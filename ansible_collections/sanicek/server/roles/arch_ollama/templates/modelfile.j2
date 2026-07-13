@@ -1,0 +1,7 @@
+FROM {{ item.base }}
+{% for param in item.params | default([]) %}
+PARAMETER {{ param }}
+{% endfor %}
+{% if item.system_prompt | default('') | length > 0 %}
+SYSTEM """{{ item.system_prompt }}"""
+{% endif %}
