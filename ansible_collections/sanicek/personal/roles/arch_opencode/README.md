@@ -65,15 +65,39 @@ Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
 
 ### hybrid_qwen35b_go profile
 
-Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b` and selects `hybrid` by default. Its hybrid preset assigns the local model to both Librarian and Explorer. Title generation uses `opencode-go/deepseek-v4-flash`.
+Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b`. The profile includes four presets: `openai`, `hybrid` (the default), `hybridgo`, and `superbudget`. Title generation uses `opencode-go/deepseek-v4-flash`.
 
 Hybrid OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
 - Oracle: `openai/gpt-5.6-sol` (high)
-- Librarian: `ollama/qwen3.6:35b` — MCPs: websearch, context7, gh_grep
-- Explorer: `ollama/qwen3.6:35b`
+- Librarian: `ollama/qwen-agent` — MCPs: websearch, context7, gh_grep
+- Explorer: `ollama/qwen-agent`
 - Designer: `opencode-go/deepseek-v4-pro` (max)
 - Fixer: `opencode-go/deepseek-v4-pro` (max)
+
+### hybridgo preset
+
+Uses opencode-go for orchestration and architecture review, while Librarian and Explorer remain on local `qwen-agent`. Designer and Fixer use opencode-go with max variant.
+
+Hybridgo OmO agents:
+- Orchestrator: `opencode-go/deepseek-v4-pro` (max)
+- Oracle: `opencode-go/glm-5.2` (max)
+- Librarian: `ollama/qwen-agent` — MCPs: websearch, context7, gh_grep
+- Explorer: `ollama/qwen-agent`
+- Designer: `opencode-go/deepseek-v4-pro` (max)
+- Fixer: `opencode-go/deepseek-v4-pro` (max)
+
+### superbudget preset
+
+Cost-optimized preset. Orchestrator uses opencode-go flash variant; all other agents use local `qwen-agent`.
+
+Superbudget OmO agents:
+- Orchestrator: `opencode-go/deepseek-v4-flash` (max)
+- Oracle: `opencode-go/deepseek-v4-pro` (max)
+- Librarian: `ollama/qwen-agent` — MCPs: websearch, context7, gh_grep
+- Explorer: `ollama/qwen-agent`
+- Designer: `ollama/qwen-agent`
+- Fixer: `ollama/qwen-agent`
 
 ### Auto-update and versioning
 
@@ -85,6 +109,12 @@ This role does not manage API keys, login credentials, or provider authenticatio
 - `opencode auth login` for ChatGPT Plus/Pro
 - `opencode models --refresh` to update the subscription model list
 - For either hybrid profile with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b` or `ollama pull qwen3.6:35b`, matching the selected profile)
+
+## Orchestrator discipline
+
+Every non-empty profile deploys an orchestrator discipline prompt (`orchestrator_append.md`) to `~/.config/opencode/oh-my-opencode-slim/orchestrator_append.md`. This prompt enforces a lane-based delegation workflow: the orchestrator must route non-trivial implementation, research, design, and review work to specialist subagents (fixer, oracle, librarian, designer, explorer) instead of executing directly.
+
+The discipline file is a shared resource deployed identically for all profiles. It is not profile-specific.
 
 ## Usage
 
