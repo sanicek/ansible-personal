@@ -1,1 +1,3 @@
 arch_aws_cli_package: aws-cli-v2
+arch_aur_helper: paru
+arch_aws_session_manager_plugin_aur_package: aws-session-manager-plugin

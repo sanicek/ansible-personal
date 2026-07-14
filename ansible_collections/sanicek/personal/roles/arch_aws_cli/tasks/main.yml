@@ -2,3 +2,29 @@
   community.general.pacman:
     name: "{{ arch_aws_cli_package }}"
     state: present
+
+- name: Check whether AWS Session Manager plugin is installed
+  ansible.builtin.command: "pacman -Q {{ arch_aws_session_manager_plugin_aur_package }}"
+  register: arch_aws_session_manager_plugin_package
+  changed_when: false
+  failed_when: false
+
+- name: Check available AWS Session Manager plugin AUR updates
+  ansible.builtin.command: "{{ arch_aur_helper }} -Qua"
+  register: arch_aws_session_manager_plugin_aur_updates
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Install or update AWS Session Manager plugin from AUR
+  ansible.builtin.command: "{{ arch_aur_helper }} -S --needed --noconfirm {{ arch_aws_session_manager_plugin_aur_package }}"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  when: >
+    arch_aws_session_manager_plugin_package.rc != 0
+    or arch_aws_session_manager_plugin_aur_updates.stdout is search('(^|\n)' ~ arch_aws_session_manager_plugin_aur_package ~ '\s')

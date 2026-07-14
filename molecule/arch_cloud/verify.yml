@@ -3,7 +3,7 @@
   gather_facts: false
   tasks:
     - name: Check cloud CLI packages
-      ansible.builtin.command: pacman -Q terraform aws-cli-v2 azure-cli vault
+      ansible.builtin.command: pacman -Q terraform aws-cli-v2 aws-session-manager-plugin azure-cli vault
       register: arch_cloud_packages
       changed_when: false
 
@@ -13,6 +13,7 @@
       loop:
         - /usr/bin/terraform
         - /usr/bin/aws
+        - /usr/bin/session-manager-plugin
         - /usr/bin/az
         - /usr/bin/vault
       register: arch_cloud_binaries
@@ -22,6 +23,7 @@
         that:
           - "'terraform' in arch_cloud_packages.stdout"
           - "'aws-cli-v2' in arch_cloud_packages.stdout"
+          - "'aws-session-manager-plugin' in arch_cloud_packages.stdout"
           - "'azure-cli' in arch_cloud_packages.stdout"
           - "'vault' in arch_cloud_packages.stdout"
           - arch_cloud_binaries.results | map(attribute='stat.exists') | min
