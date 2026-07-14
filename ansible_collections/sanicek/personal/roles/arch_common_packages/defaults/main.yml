@@ -5,3 +5,4 @@ arch_common_packages:
   - ripgrep
   - jq
   - gron
+  - wget
