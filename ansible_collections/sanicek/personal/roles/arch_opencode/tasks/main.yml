@@ -1,8 +1,8 @@
 - name: Validate opencode profile name
   ansible.builtin.assert:
     that:
-      - arch_opencode_profile in ['', 'cloud_openai', 'hybrid_qwen_go', 'hybrid_qwen35b_go', 'cloud_copilot']
-    fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Valid profiles: cloud_openai, hybrid_qwen_go, hybrid_qwen35b_go, cloud_copilot"
+      - arch_opencode_profile in ['', 'omo-slim-cloud-openai', 'omo-slim-hybrid-qwen35b-go', 'omo-slim-cloud-copilot']
+    fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Valid profiles: omo-slim-cloud-openai, omo-slim-hybrid-qwen35b-go, omo-slim-cloud-copilot"
   when: arch_opencode_profile | length > 0
 
 - name: Load opencode profile behavior vars
@@ -44,17 +44,18 @@
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
   become: false
-  when: arch_opencode_profile | length > 0
+  when: arch_opencode_profile is match('^omo-slim-')
 
-- name: Deploy shared orchestrator append prompt
+- name: Deploy oh-my-opencode-slim config
   ansible.builtin.copy:
-    src: orchestrator_append.md
-    dest: "{{ arch_opencode_config_dir }}/oh-my-opencode-slim/orchestrator_append.md"
+    src: "profiles/{{ arch_opencode_profile }}/{{ item }}"
+    dest: "{{ arch_opencode_config_dir }}/{{ item }}"
     mode: "0644"
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
   become: false
-  when: arch_opencode_profile | length > 0
+  loop: "{{ arch_opencode_omo_slim_managed_files }}"
+  when: arch_opencode_profile is match('^omo-slim-')
 
 - name: Ensure opencode plugins directory exists
   ansible.builtin.file:

@@ -48,7 +48,7 @@
       become: true
 
 - name: Seed existing opencode config for stale-key removal test
-  hosts: hybrid-profile
+  hosts: hybrid-35b-profile
   gather_facts: false
   tasks:
     - name: Ensure seeded opencode config directory exists
@@ -134,33 +134,6 @@
         owner: molecule
         group: molecule
         content: "runtime-state-data\n"
-      become: true
-
-    - name: Ensure oh-my-opencode-slim directory exists on hybrid profile
-      ansible.builtin.file:
-        path: /home/molecule/.config/opencode/oh-my-opencode-slim
-        state: directory
-        mode: "0755"
-        owner: molecule
-        group: molecule
-      become: true
-
-    - name: Seed stale orchestrator append content on hybrid profile
-      ansible.builtin.copy:
-        dest: /home/molecule/.config/opencode/oh-my-opencode-slim/orchestrator_append.md
-        mode: "0644"
-        owner: molecule
-        group: molecule
-        content: "Stale orchestrator append content - should be replaced\n"
-      become: true
-
-    - name: Seed unrelated nested sibling in oh-my-opencode-slim on hybrid profile
-      ansible.builtin.copy:
-        dest: /home/molecule/.config/opencode/oh-my-opencode-slim/.sibling-runtime
-        mode: "0644"
-        owner: molecule
-        group: molecule
-        content: "unrelated-sibling-runtime\n"
       become: true
 
 - name: Seed unknown sibling file on cloud profile
