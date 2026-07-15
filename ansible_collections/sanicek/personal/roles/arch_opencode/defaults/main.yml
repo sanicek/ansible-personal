@@ -1,6 +1,11 @@
-arch_opencode_package: opencode
 arch_opencode_bun_package: bun
-arch_opencode_install_bun: false
+arch_opencode_npm_package: opencode-ai
+arch_opencode_npm_registry_url: "https://registry.npmjs.org/{{ arch_opencode_npm_package }}/latest"
+arch_opencode_bun_executable: /usr/bin/bun
+arch_opencode_bun_install_dir: "{{ user_home }}/.bun"
+arch_opencode_bun_global_bin: "{{ arch_opencode_bun_install_dir }}/bin"
+arch_opencode_binary: "{{ arch_opencode_bun_global_bin }}/opencode"
+arch_opencode_system_link: /usr/local/bin/opencode
 
 arch_opencode_profile: ""
 
