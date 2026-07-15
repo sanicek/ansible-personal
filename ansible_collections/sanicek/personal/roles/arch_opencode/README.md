@@ -9,16 +9,15 @@ The role can optionally deploy a static profile to `~/.config/opencode/` by sett
 Valid profile values:
 
 - `""` (empty / default): Install opencode only. Existing config files in `~/.config/opencode/` are left untouched.
-- `cloud_openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
-- `hybrid_qwen_go`: Multi-provider deployment combining OpenAI orchestration, local Ollama exploration, and opencode-go DeepSeek agents.
-- `hybrid_qwen35b_go`: Multi-provider deployment using local Qwen3.6 35B for exploration and library research, OpenAI orchestration, and opencode-go DeepSeek implementation agents.
-- `cloud_copilot`: GitHub Copilot-only deployment via the built-in `github-copilot` provider. Every model is prefixed `github-copilot/`. No external auth plugin, no role-managed credentials or secrets, and no fallback provider. Authenticate once with `opencode auth login`.
+- `omo-slim-cloud-openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
+- `omo-slim-hybrid-qwen35b-go`: Multi-provider deployment using local Qwen3.6 35B for exploration and library research, OpenAI orchestration, and opencode-go DeepSeek implementation agents.
+- `omo-slim-cloud-copilot`: GitHub Copilot-only deployment via the built-in `github-copilot` provider. Every model is prefixed `github-copilot/`. No external auth plugin, no role-managed credentials or secrets, and no fallback provider. Authenticate once with `opencode auth login`.
 
 An invalid profile name fails early with a message listing the valid values.
 
 ### Managed files
 
-Each profile deploys exactly three files:
+Each profile deploys `opencode.jsonc` and `tui.jsonc`. OmO Slim profiles (names beginning with `omo-slim-`) also deploy `oh-my-opencode-slim.json` and ensure the `oh-my-opencode-slim/` directory exists.
 
 | File | Purpose |
 |------|---------|
@@ -34,12 +33,11 @@ The `title` agent in `opencode.jsonc` is an OpenCode core hidden agent that gene
 
 | Profile | Title model | Variant |
 |---------|-------------|---------|
-| `cloud_openai` | `openai/gpt-5.5` | `fast` |
-| `hybrid_qwen_go` | `opencode-go/deepseek-v4-flash` | _none_ |
-| `hybrid_qwen35b_go` | `opencode-go/deepseek-v4-flash` | _none_ |
-| `cloud_copilot` | `github-copilot/raptor-mini` | `low` |
+| `omo-slim-cloud-openai` | `openai/gpt-5.5` | `fast` |
+| `omo-slim-hybrid-qwen35b-go` | `opencode-go/deepseek-v4-flash` | _none_ |
+| `omo-slim-cloud-copilot` | `github-copilot/raptor-mini` | `low` |
 
-### cloud_openai profile
+### omo-slim-cloud-openai profile
 
 Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro. Title generation uses `openai/gpt-5.5` with the `fast` variant.
 
@@ -51,7 +49,7 @@ OmO agents:
 - Designer: `openai/gpt-5.6-terra`
 - Fixer: `openai/gpt-5.6-terra`
 
-### cloud_copilot profile
+### omo-slim-cloud-copilot profile
 
 Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, restricts `enabled_providers` to `["github-copilot"]`, and writes a Copilot-only OmO preset. Title generation uses `github-copilot/raptor-mini` with the `low` variant.
 
@@ -65,23 +63,9 @@ OmO agents:
 
 No OpenAI, Ollama, or opencode-go preset/fallback is included. All models are routed exclusively through the built-in `github-copilot` provider. After applying the profile, authenticate once with `opencode auth login`.
 
-### hybrid_qwen_go profile
+### omo-slim-hybrid-qwen35b-go profile
 
-Same plugin and background-subagent setup as `cloud_openai`, plus an opencode Ollama provider configuration for `qwen3.5:9b` with attachment, reasoning, tool-call, 131072 context limit, and 8192 output limit. Deploys two OmO presets: `openai` (identical to `cloud_openai`) and `hybrid`. Title generation uses `opencode-go/deepseek-v4-flash`.
-
-Hybrid OmO agents:
-- Orchestrator: `openai/gpt-5.6-sol` (medium)
-- Oracle: `openai/gpt-5.6-sol` (high)
-- Librarian: `opencode-go/deepseek-v4-flash` — MCPs: websearch, context7, gh_grep
-- Explorer: `ollama/qwen3.5:9b`
-- Designer: `opencode-go/deepseek-v4-pro` (max)
-- Fixer: `opencode-go/deepseek-v4-pro` (max)
-
-Switch between presets by changing `"preset"` in `oh-my-opencode-slim.json`.
-
-### hybrid_qwen35b_go profile
-
-Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `hybrid_qwen_go`, but configures the local Ollama provider for `qwen3.6:35b`. The profile includes four presets: `openai`, `hybrid` (the default), `hybridgo`, and `superbudget`. Title generation uses `opencode-go/deepseek-v4-flash`.
+Uses the same plugin, background-subagent, OpenAI preset, and Ollama limits as `omo-slim-cloud-openai`, but configures the local Ollama provider for `qwen3.6:35b`. The profile includes four presets: `openai`, `hybrid` (the default), `hybridgo`, and `superbudget`. Title generation uses `opencode-go/deepseek-v4-flash`.
 
 Hybrid OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol` (medium)
@@ -124,13 +108,7 @@ Superbudget OmO agents:
 This role does not manage API keys, login credentials, or provider authentication. After applying a profile, authenticate interactively:
 - `opencode auth login` for ChatGPT Plus/Pro or GitHub Copilot
 - `opencode models --refresh` to update the subscription model list
-- For either hybrid profile with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.5:9b` or `ollama pull qwen3.6:35b`, matching the selected profile)
-
-## Orchestrator discipline
-
-Every non-empty profile deploys an orchestrator discipline prompt (`orchestrator_append.md`) to `~/.config/opencode/oh-my-opencode-slim/orchestrator_append.md`. This prompt enforces a lane-based delegation workflow: the orchestrator must route non-trivial implementation, research, design, and review work to specialist subagents (fixer, oracle, librarian, designer, explorer) instead of executing directly.
-
-The discipline file is a shared resource deployed identically for all profiles. It is not profile-specific.
+- For the hybrid profile with the `hybrid` preset: configure opencode-go authentication outside this role, and install/start Ollama separately (`ollama pull qwen3.6:35b`)
 
 ## Usage
 
@@ -141,15 +119,14 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.ym
 
 Apply a profile:
 ```bash
-ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_openai
-ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen_go
-ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=hybrid_qwen35b_go
-ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=cloud_copilot
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=omo-slim-cloud-openai
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=omo-slim-hybrid-qwen35b-go
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=omo-slim-cloud-copilot
 ```
 
 ## Overwrite semantics
 
-The role only writes the three managed files listed above. It never removes files from `~/.config/opencode/`. Switching profiles replaces managed files with the new profile's versions; switching back to no profile (`arch_opencode_profile=""`) leaves the previously-deployed managed files in place.
+The role only writes the managed files listed above. It never removes files from `~/.config/opencode/`. Switching profiles replaces managed files with the new profile's versions; switching back to no profile (`arch_opencode_profile=""`) leaves the previously-deployed managed files in place.
 
 Shell environment configuration (e.g., `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS`) is only written to `.bashrc` when a profile is selected. Install-only runs do not touch `.bashrc` or any config files.
 

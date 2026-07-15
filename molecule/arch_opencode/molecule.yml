@@ -20,13 +20,6 @@ platforms:
     command: /usr/bin/sleep infinity
     groups:
       - local
-  - name: hybrid-profile
-    dockerfile: Dockerfile.j2
-    image: docker.io/archlinux:latest
-    pre_build_image: false
-    command: /usr/bin/sleep infinity
-    groups:
-      - local
   - name: hybrid-35b-profile
     dockerfile: Dockerfile.j2
     image: docker.io/archlinux:latest
@@ -60,22 +53,17 @@ provisioner:
         ansible_become_method: sudo
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
-        arch_opencode_profile: cloud_openai
-      hybrid-profile:
-        ansible_become_method: sudo
-        ansible_python_interpreter: /usr/bin/python3
-        ansible_user: molecule
-        arch_opencode_profile: hybrid_qwen_go
+        arch_opencode_profile: omo-slim-cloud-openai
       hybrid-35b-profile:
         ansible_become_method: sudo
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
-        arch_opencode_profile: hybrid_qwen35b_go
+        arch_opencode_profile: omo-slim-hybrid-qwen35b-go
       copilot-profile:
         ansible_become_method: sudo
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
-        arch_opencode_profile: cloud_copilot
+        arch_opencode_profile: omo-slim-cloud-copilot
 scenario:
   test_sequence:
     - dependency

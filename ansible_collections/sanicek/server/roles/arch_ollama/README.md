@@ -61,7 +61,7 @@ If none of these signals indicate a change, the model is not rebuilt.
 | `arch_ollama_backend` | `rocm` | Inference backend (`cpu`, `rocm`, `vulkan`) |
 | `arch_ollama_host` | `127.0.0.1:11434` | `OLLAMA_HOST` bind address and port |
 | `arch_ollama_keep_alive` | `1h` | `OLLAMA_KEEP_ALIVE` duration for keeping models loaded |
-| `arch_ollama_context_length` | `""` | `OLLAMA_CONTEXT_LENGTH` (empty to use model default). When opencode uses this Ollama instance via a profile (e.g., `hybrid_qwen_go`), ensure the context limit in the profile's `opencode.jsonc` matches this value. |
+| `arch_ollama_context_length` | `""` | `OLLAMA_CONTEXT_LENGTH` (empty to use model default). When opencode uses this Ollama instance via a profile (e.g., `omo-slim-hybrid-qwen35b-go` with its local `qwen-agent` model), ensure the context limit in the profile's `opencode.jsonc` matches this value. |
 | `arch_ollama_rocm_hsa_override_gfx_version` | `""` | Optional `HSA_OVERRIDE_GFX_VERSION` for ROCm GPU compatibility (empty to skip) |
 | `arch_ollama_models` | `[qwen3.6:35b]` | List of Ollama models to pull |
 | `arch_ollama_custom_models` | See defaults | Custom model definitions (list of dicts with `name`, `base`, `params`, `system_prompt`) |

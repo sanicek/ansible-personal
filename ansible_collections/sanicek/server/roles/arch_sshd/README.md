@@ -97,4 +97,4 @@ Host myserver
     ServerAliveInterval 60
 ```
 
-Opencode can use this tunnel transparently. When an opencode profile configures an Ollama provider (e.g., the `hybrid_qwen_go` profile sets the base URL to `http://127.0.0.1:11434/v1` in `opencode.jsonc`), the tunnel forwards traffic to the remote server.
+Opencode can use this tunnel transparently. When an opencode profile configures an Ollama provider (e.g., the `omo-slim-hybrid-qwen35b-go` profile sets the base URL to `http://127.0.0.1:11434/v1` in `opencode.jsonc` for its local `qwen-agent` model), the tunnel forwards traffic to the remote server.

@@ -8,6 +8,8 @@ arch_opencode_config_dir: "{{ user_home }}/.config/opencode"
 arch_opencode_managed_files:
   - opencode.jsonc
   - tui.jsonc
+
+arch_opencode_omo_slim_managed_files:
   - oh-my-opencode-slim.json
 
 arch_opencode_enable_background_subagents: false
