@@ -1,6 +1,12 @@
 # arch_opencode
 
-Installs opencode from native Arch Linux packages.
+Installs the latest stable `opencode-ai` npm release with Bun on Arch Linux.
+
+## Installation and upgrades
+
+Bun is installed from Pacman on every role run. The role removes the legacy Pacman `opencode` package, resolves the npm registry's `latest` version for `opencode-ai`, and installs that explicit version globally for the target user only when the user's installed version differs or is missing. The user-global binary is `~/.bun/bin/opencode` and is exposed through a role-managed `/usr/local/bin/opencode` symlink.
+
+Only upstream Linux `x86_64`/`amd64` and `aarch64`/`arm64` architectures are supported. Re-running the role checks npm metadata and upgrades OpenCode when a newer stable release is available.
 
 ## Profiles
 
@@ -8,7 +14,7 @@ The role can optionally deploy a static profile to `~/.config/opencode/` by sett
 
 Valid profile values:
 
-- `""` (empty / default): Install opencode only. Existing config files in `~/.config/opencode/` are left untouched.
+- `""` (empty / default): Install OpenCode only. Existing config files in `~/.config/opencode/` are left untouched.
 - `omo-slim-cloud-openai`: OpenAI-only deployment via ChatGPT Plus/Pro.
 - `omo-slim-hybrid-qwen35b-go`: Multi-provider deployment using local Qwen3.6 35B for exploration and library research, OpenAI orchestration, and opencode-go DeepSeek implementation agents.
 - `omo-slim-cloud-copilot`: GitHub Copilot-only deployment via the built-in `github-copilot` provider. Every model is prefixed `github-copilot/`. No external auth plugin, no role-managed credentials or secrets, and no fallback provider. Authenticate once with `opencode auth login`.
@@ -39,7 +45,7 @@ The `title` agent in `opencode.jsonc` is an OpenCode core hidden agent that gene
 
 ### omo-slim-cloud-openai profile
 
-Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro. Title generation uses `openai/gpt-5.5` with the `fast` variant.
+Deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, and writes an OpenAI-only OmO preset intended for ChatGPT Plus/Pro. Title generation uses `openai/gpt-5.5` with the `fast` variant.
 
 OmO agents:
 - Orchestrator: `openai/gpt-5.6-sol-fast`
@@ -51,7 +57,7 @@ OmO agents:
 
 ### omo-slim-cloud-copilot profile
 
-Installs Bun, deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, restricts `enabled_providers` to `["github-copilot"]`, and writes a Copilot-only OmO preset. Title generation uses `github-copilot/raptor-mini` with the `low` variant.
+Deploys `oh-my-opencode-slim@latest` as both a core plugin and TUI plugin, enables background subagents, disables the built-in `explore` and `general` agents, enables LSP, restricts `enabled_providers` to `["github-copilot"]`, and writes a Copilot-only OmO preset. Title generation uses `github-copilot/raptor-mini` with the `low` variant.
 
 OmO agents:
 - Orchestrator: `github-copilot/gpt-5.6-sol` (high)
@@ -112,7 +118,7 @@ This role does not manage API keys, login credentials, or provider authenticatio
 
 ## Usage
 
-Install opencode only (no config changes):
+Install or upgrade OpenCode only (no config changes):
 ```bash
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml
 ```
@@ -130,4 +136,4 @@ The role only writes the managed files listed above. It never removes files from
 
 Shell environment configuration (e.g., `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS`) is only written to `.bashrc` when a profile is selected. Install-only runs do not touch `.bashrc` or any config files.
 
-Re-running the same profile is safe and idempotent (the same file content is deployed each time).
+Re-running the same profile is safe and idempotent: managed profile files are refreshed and Bun runs only when the installed OpenCode version differs from the resolved latest stable npm release.

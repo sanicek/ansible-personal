@@ -10,10 +10,102 @@
     file: "profiles/{{ arch_opencode_profile }}.yml"
   when: arch_opencode_profile | length > 0
 
-- name: Install opencode packages
+- name: Gather architecture facts when needed
+  ansible.builtin.setup:
+    gather_subset:
+      - hardware
+  when: ansible_facts["architecture"] is not defined
+
+- name: Require supported opencode architecture
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["architecture"] in ['x86_64', 'amd64', 'aarch64', 'arm64']
+    fail_msg: "OpenCode supports x86_64/amd64 and arm64/aarch64 Linux only. Detected: {{ ansible_facts['architecture'] | default('unknown') }}."
+
+- name: Install Bun package
   community.general.pacman:
-    name: "{{ [arch_opencode_package] + ([arch_opencode_bun_package] if arch_opencode_install_bun else []) }}"
+    name: "{{ arch_opencode_bun_package }}"
     state: present
+  become: true
+
+- name: Remove legacy Pacman opencode package
+  community.general.pacman:
+    name: opencode
+    state: absent
+  become: true
+
+- name: Resolve latest stable opencode npm release
+  ansible.builtin.uri:
+    url: "{{ arch_opencode_npm_registry_url }}"
+    return_content: true
+    status_code: 200
+  register: arch_opencode_npm_latest
+  changed_when: false
+
+- name: Set resolved opencode version
+  ansible.builtin.set_fact:
+    arch_opencode_resolved_version: "{{ arch_opencode_npm_latest.json.version }}"
+
+- name: Require resolved opencode version
+  ansible.builtin.assert:
+    that:
+      - arch_opencode_resolved_version is match('^[0-9]+\.[0-9]+\.[0-9]+')
+    fail_msg: "The npm registry returned an invalid opencode version: {{ arch_opencode_resolved_version | default('unknown') }}."
+
+- name: Check target-user opencode version
+  ansible.builtin.command: "{{ arch_opencode_binary }} --version"
+  register: arch_opencode_installed_version
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    BUN_INSTALL: "{{ arch_opencode_bun_install_dir }}"
+
+- name: Normalize installed opencode version
+  ansible.builtin.set_fact:
+    arch_opencode_installed_version_normalized: "{{ arch_opencode_installed_version.stdout | trim | regex_replace('^v', '') }}"
+
+- name: Install or update latest stable opencode with Bun
+  ansible.builtin.command:
+    argv:
+      - "{{ arch_opencode_bun_executable }}"
+      - add
+      - --global
+      - "{{ arch_opencode_npm_package }}@{{ arch_opencode_resolved_version }}"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    BUN_INSTALL: "{{ arch_opencode_bun_install_dir }}"
+  when: >-
+    arch_opencode_installed_version.rc != 0
+    or arch_opencode_installed_version_normalized != arch_opencode_resolved_version
+
+- name: Check Bun-managed opencode binary
+  ansible.builtin.stat:
+    path: "{{ arch_opencode_binary }}"
+  register: arch_opencode_binary_stat
+  become: true
+
+- name: Require executable Bun-managed opencode binary
+  ansible.builtin.assert:
+    that:
+      - arch_opencode_binary_stat.stat.exists
+      - arch_opencode_binary_stat.stat.executable
+      - arch_opencode_binary_stat.stat.pw_name == user_name
+    fail_msg: "Bun did not install an executable opencode binary at {{ arch_opencode_binary }} for {{ user_name }}."
+
+- name: Expose Bun-managed opencode binary system-wide
+  ansible.builtin.file:
+    src: "{{ arch_opencode_binary }}"
+    dest: "{{ arch_opencode_system_link }}"
+    state: link
+    force: true
+    owner: root
+    group: root
+  become: true
 
 - name: Ensure opencode configuration directory exists
   ansible.builtin.file:

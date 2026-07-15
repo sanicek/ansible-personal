@@ -1,6 +1,6 @@
 galaxy_info:
   author: sanicek
-  description: opencode setup on Arch Linux using native packages.
+  description: Bun-managed latest stable OpenCode setup on Arch Linux.
   license: MIT
   min_ansible_version: "2.16"
   platforms:
