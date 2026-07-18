@@ -22,6 +22,11 @@
         path: /usr/local/share/bash-git-prompt/gitprompt.sh
       register: arch_shell_git_prompt
 
+    - name: Check Flexoki prompt theme
+      ansible.builtin.slurp:
+        path: /usr/local/share/bash-git-prompt/themes/Flexoki.bgptheme
+      register: arch_shell_git_prompt_theme
+
     - name: Check Yazi manager configuration
       ansible.builtin.slurp:
         path: /home/molecule/.config/yazi/yazi.toml
@@ -44,11 +49,8 @@
           - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_system_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_user_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_system_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_THEME=BlackOrWhite' in (arch_shell_user_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white' in (arch_shell_user_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles' in (arch_shell_user_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time' in (arch_shell_user_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_THEME=BlackOrWhite' in (arch_shell_system_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white' in (arch_shell_system_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles' in (arch_shell_system_bashrc.content | b64decode)"
-          - "'GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time' in (arch_shell_system_bashrc.content | b64decode)"
+          - "'GIT_PROMPT_THEME=Flexoki' in (arch_shell_user_bashrc.content | b64decode)"
+          - "'GIT_PROMPT_THEME=Flexoki' in (arch_shell_system_bashrc.content | b64decode)"
+          - "'GIT_PROMPT_THEME_NAME=\"Flexoki\"' in (arch_shell_git_prompt_theme.content | b64decode)"
+          - "'GIT_PROMPT_STAGED=\"${Yellow}●\"' in (arch_shell_git_prompt_theme.content | b64decode)"
+          - "'${BoldBlue}${Time12a}${ResetColor} $' in (arch_shell_git_prompt_theme.content | b64decode)"

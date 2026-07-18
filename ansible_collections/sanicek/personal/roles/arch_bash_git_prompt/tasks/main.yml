@@ -10,6 +10,14 @@
     clone: true
     update: true
 
+- name: Install Flexoki bash-git-prompt theme
+  ansible.builtin.copy:
+    src: Flexoki.bgptheme
+    dest: /usr/local/share/bash-git-prompt/themes/Flexoki.bgptheme
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Add bash-git-prompt to user's bashrc
   ansible.builtin.blockinfile:
     path: "{{ user_home }}/.bashrc"
@@ -17,10 +25,7 @@
       if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
 
         GIT_PROMPT_ONLY_IN_REPO=0
-        GIT_PROMPT_THEME=BlackOrWhite
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time
+        GIT_PROMPT_THEME=Flexoki
 
         source /usr/local/share/bash-git-prompt/gitprompt.sh
 
@@ -48,10 +53,7 @@
       if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
 
         GIT_PROMPT_ONLY_IN_REPO=0
-        GIT_PROMPT_THEME=BlackOrWhite
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles
-        GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time
+        GIT_PROMPT_THEME=Flexoki
 
         source /usr/local/share/bash-git-prompt/gitprompt.sh
 
