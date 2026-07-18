@@ -16,15 +16,13 @@
     block: |
       if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
 
-        source /usr/local/share/bash-git-prompt/gitprompt.sh
-
         GIT_PROMPT_ONLY_IN_REPO=0
+        GIT_PROMPT_THEME=BlackOrWhite
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time
 
-        if [ -n "${WSL_DISTRO_NAME:-}" ] || [ -n "${WSL_INTEROP:-}" ] || grep -qiE 'microsoft|wsl' /proc/sys/kernel/osrelease 2>/dev/null; then
-          GIT_PROMPT_THEME=Default_Ubuntu
-        else
-          GIT_PROMPT_THEME=Default
-        fi
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
 
         function set_title {
           local DIR=$(pwd | sed "s|^$HOME|~|")
@@ -35,10 +33,7 @@
           fi
         }
 
-        PROMPT_COMMAND=set_title
-
-        GIT_PROMPT_START_USER="\u@\h:\w"
-        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+        add_to_end_of_prompt_command set_title
 
       fi
     marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
@@ -52,15 +47,13 @@
     block: |
       if [ -f "/usr/local/share/bash-git-prompt/gitprompt.sh" ]; then
 
-        source /usr/local/share/bash-git-prompt/gitprompt.sh
-
         GIT_PROMPT_ONLY_IN_REPO=0
+        GIT_PROMPT_THEME=BlackOrWhite
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_PS1_COLOR=white
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_STYLE=bubbles
+        GIT_PROMPT_BLACK_OR_WHITE_THEME_VISIBLE_SECTIONS=user_and_hostname,path,last_command_state,time
 
-        if [ -n "${WSL_DISTRO_NAME:-}" ] || [ -n "${WSL_INTEROP:-}" ] || grep -qiE 'microsoft|wsl' /proc/sys/kernel/osrelease 2>/dev/null; then
-          GIT_PROMPT_THEME=Default_Ubuntu
-        else
-          GIT_PROMPT_THEME=Default
-        fi
+        source /usr/local/share/bash-git-prompt/gitprompt.sh
 
         function set_title {
           local DIR=$(pwd | sed "s|^$HOME|~|")
@@ -71,10 +64,7 @@
           fi
         }
 
-        PROMPT_COMMAND=set_title
-
-        GIT_PROMPT_START_USER="\u@\h:\w"
-        GIT_PROMPT_END_USER="\n_LAST_COMMAND_INDICATOR_ \t \$ "
+        add_to_end_of_prompt_command set_title
 
       fi
     marker: "# {mark} ANSIBLE MANAGED BLOCK bash-git-prompt"
