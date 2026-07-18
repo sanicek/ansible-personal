@@ -28,5 +28,7 @@
           - arch_terminal_kitty_binary.stat.exists
           - "'font_family      Cascadia Mono' in (arch_terminal_kitty_config.content | b64decode)"
           - "'shell_integration disabled' in (arch_terminal_kitty_config.content | b64decode)"
+          - "'background              #100F0F' in (arch_terminal_kitty_config.content | b64decode)"
+          - "'foreground              #CECDC3' in (arch_terminal_kitty_config.content | b64decode)"
           - "'Exec=kitty --start-as=maximized' in (arch_terminal_kitty_launcher.content | b64decode)"
           - "'CaskaydiaMono' in arch_terminal_cascadia_font.stdout or 'Cascadia' in arch_terminal_cascadia_font.stdout"

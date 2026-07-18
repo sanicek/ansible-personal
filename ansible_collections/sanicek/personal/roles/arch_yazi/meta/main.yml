@@ -1,6 +1,6 @@
 galaxy_info:
   author: sanicek
-  description: Arch Linux Yazi setup with Solarized Dark flavor.
+  description: Arch Linux Yazi setup with Flexoki Dark flavor.
   license: MIT
   min_ansible_version: "2.16"
   platforms:

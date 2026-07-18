@@ -23,7 +23,7 @@
   environment:
     HOME: "{{ user_home }}"
 
-- name: Install Yazi Solarized Dark flavor
+- name: Install Yazi Flexoki Dark flavor
   ansible.builtin.command: "ya pkg add {{ arch_yazi_flavor_package }}"
   args:
     creates: "{{ user_home }}/.config/yazi/flavors/{{ arch_yazi_flavor }}.yazi/flavor.toml"
@@ -43,7 +43,7 @@
     group: "{{ user_name }}"
   become: true
 
-- name: Configure Yazi Solarized Dark flavor
+- name: Configure Yazi Flexoki Dark flavor
   ansible.builtin.copy:
     dest: "{{ user_home }}/.config/yazi/theme.toml"
     content: |

@@ -28,7 +28,7 @@
       register: arch_shell_yazi_config
 
     - name: Check Yazi flavor configuration
-      ansible.builtin.stat:
+      ansible.builtin.slurp:
         path: /home/molecule/.config/yazi/theme.toml
       register: arch_shell_yazi_theme
 
@@ -37,10 +37,14 @@
         that:
           - arch_shell_fzf_profile.stat.exists
           - arch_shell_git_prompt.stat.exists
-          - arch_shell_yazi_theme.stat.exists
           - "'[mgr]' in (arch_shell_yazi_config.content | b64decode)"
           - "'ratio = [ 1, 2, 3 ]' in (arch_shell_yazi_config.content | b64decode)"
+          - "'dark = \"flexoki-dark\"' in (arch_shell_yazi_theme.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_user_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bashrc' in (arch_shell_system_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_user_bashrc.content | b64decode)"
           - "'ANSIBLE MANAGED BLOCK bash-git-prompt' in (arch_shell_system_bashrc.content | b64decode)"
+          - "'GIT_PROMPT_THEME=Default_Ubuntu' in (arch_shell_user_bashrc.content | b64decode)"
+          - "((arch_shell_user_bashrc.content | b64decode) | regex_search('(?m)^\\s+GIT_PROMPT_THEME=Default$')) is not none"
+          - "'GIT_PROMPT_THEME=Default_Ubuntu' in (arch_shell_system_bashrc.content | b64decode)"
+          - "((arch_shell_system_bashrc.content | b64decode) | regex_search('(?m)^\\s+GIT_PROMPT_THEME=Default$')) is not none"
