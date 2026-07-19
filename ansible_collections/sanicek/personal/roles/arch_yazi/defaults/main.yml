@@ -8,10 +8,11 @@ arch_yazi_packages:
   - jq
   - ttf-inconsolata-nerd
 
-arch_yazi_flavor: solarized
-arch_yazi_flavor_package: peterfication/solarized
+arch_yazi_flavor: flexoki-dark
+arch_yazi_flavor_package: gosxrgxx/flexoki-dark
 
 arch_yazi_ratio: [1, 2, 3]
 
 arch_yazi_obsolete_packages:
   - yazi-rs/flavors:solarized-dark
+  - peterfication/solarized
