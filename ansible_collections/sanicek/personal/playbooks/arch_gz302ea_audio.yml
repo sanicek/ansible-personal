@@ -1,0 +1,6 @@
+- name: Configure ASUS ROG Flow Z13 GZ302EA speaker audio
+  hosts: local
+  become: true
+  roles:
+    - sanicek.personal.arch_bootstrap
+    - sanicek.personal.arch_gz302ea_audio

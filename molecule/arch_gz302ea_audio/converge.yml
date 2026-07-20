@@ -1,0 +1,2 @@
+- name: Converge Arch GZ302EA audio playbook
+  ansible.builtin.import_playbook: ../../ansible_collections/sanicek/personal/playbooks/arch_gz302ea_audio.yml

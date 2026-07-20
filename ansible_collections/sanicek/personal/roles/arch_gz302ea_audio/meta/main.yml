@@ -1,0 +1,15 @@
+galaxy_info:
+  author: sanicek
+  description: ASUS ROG Flow Z13 GZ302EA speaker audio configuration for Arch Linux.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - arch
+    - archlinux
+    - audio
+    - easyeffects
+dependencies: []

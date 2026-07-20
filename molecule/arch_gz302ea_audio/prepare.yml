@@ -1,0 +1,8 @@
+- name: Prepare Arch GZ302EA audio scenario
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Update pacman cache
+      community.general.pacman:
+        update_cache: true
+      become: true
