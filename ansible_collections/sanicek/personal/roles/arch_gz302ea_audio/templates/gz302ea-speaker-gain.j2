@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+target='cs35l41/bincfgs/cs35l41-dsp1-{{ arch_gz302ea_audio_firmware_gain }}.bincfg.zst'
+source='{{ arch_gz302ea_audio_firmware_dir }}/'"$target"
+
+if [ ! -f "$source" ] || [ ! -r "$source" ]; then
+  printf 'Selected CS35L41 firmware configuration is unavailable: %s\n' "$source" >&2
+  exit 1
+fi
+
+{% for firmware_link in arch_gz302ea_audio_firmware_links %}
+if [ ! -L '{{ arch_gz302ea_audio_firmware_dir }}/{{ firmware_link }}' ]; then
+  printf 'Refusing to replace unexpected firmware path: %s\n' '{{ arch_gz302ea_audio_firmware_dir }}/{{ firmware_link }}' >&2
+  exit 1
+fi
+{% endfor %}
+
+{% for firmware_link in arch_gz302ea_audio_firmware_links %}
+/usr/bin/ln -sfnT -- "$target" '{{ arch_gz302ea_audio_firmware_dir }}/{{ firmware_link }}'
+{% endfor %}

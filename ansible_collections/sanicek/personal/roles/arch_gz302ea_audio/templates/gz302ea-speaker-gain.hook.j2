@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = {{ arch_gz302ea_audio_firmware_package }}
+
+[Action]
+Description = Reapplying ASUS ROG Flow Z13 GZ302EA speaker gain configuration...
+When = PostTransaction
+Exec = {{ arch_gz302ea_audio_hook_helper }}

@@ -1,0 +1,21 @@
+arch_gz302ea_audio_packages:
+  - easyeffects
+  - lsp-plugins-lv2
+arch_gz302ea_audio_firmware_package: linux-firmware-cirrus
+
+arch_gz302ea_audio_firmware_gain: 19_5dB
+arch_gz302ea_audio_supported_firmware_gains:
+  - 15_5dB
+  - 19_5dB
+arch_gz302ea_audio_firmware_dir: /usr/lib/firmware/cirrus
+arch_gz302ea_audio_firmware_links:
+  - cs35l41-dsp1-spk-prot-10431fb3-l0.bincfg.zst
+  - cs35l41-dsp1-spk-prot-10431fb3-r0.bincfg.zst
+arch_gz302ea_audio_hook_helper: /usr/local/libexec/gz302ea-speaker-gain
+arch_gz302ea_audio_pacman_hook: /etc/pacman.d/hooks/gz302ea-speaker-gain.hook
+
+arch_gz302ea_audio_preset_name: GZ302-Metal
+arch_gz302ea_audio_preset_dir: "{{ user_home }}/.local/share/easyeffects/output"
+arch_gz302ea_audio_user_unit_dir: "{{ user_home }}/.config/systemd/user"
+arch_gz302ea_audio_easyeffects_enabled: true
+arch_gz302ea_audio_manage_runtime: true

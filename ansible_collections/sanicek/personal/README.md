@@ -29,6 +29,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_rimworld_modding.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_godot.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_gz302ea_audio.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/debug_facts.yml
 ```
 
@@ -36,7 +37,7 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/debug_facts.yml
 
 Fedora currently has workstation, shell, GUI application, and terminal playbooks.
 
-Arch Linux currently has GUI application, opencode, terminal, shell environment, cloud CLI, Kubernetes CLI, RimWorld mod development, and Godot game development setup.
+Arch Linux currently has GUI application, opencode, terminal, shell environment, cloud CLI, Kubernetes CLI, RimWorld mod development, Godot game development, and ASUS ROG Flow Z13 GZ302EA speaker audio setup.
 
 The Arch GUI application playbook uses AUR for Google Chrome and Visual Studio Code because their official proprietary builds are needed for cloud sync. KeePassXC is installed from native Arch Linux packages.
 

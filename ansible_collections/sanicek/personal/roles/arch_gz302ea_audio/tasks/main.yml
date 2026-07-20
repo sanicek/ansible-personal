@@ -1,0 +1,404 @@
+- name: Validate GZ302EA audio configuration
+  ansible.builtin.assert:
+    that:
+      - arch_gz302ea_audio_firmware_gain in arch_gz302ea_audio_supported_firmware_gains
+    fail_msg: >-
+      arch_gz302ea_audio_firmware_gain must be one of
+      {{ arch_gz302ea_audio_supported_firmware_gains | join(', ') }}.
+
+- name: Resolve target user ID
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/id
+      - -u
+      - "{{ user_name }}"
+  register: arch_gz302ea_audio_user_id
+  changed_when: false
+
+- name: Resolve target user primary group
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/id
+      - -gn
+      - "{{ user_name }}"
+  register: arch_gz302ea_audio_user_group
+  changed_when: false
+
+- name: Resolve target user account
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/getent
+      - passwd
+      - "{{ user_name }}"
+  register: arch_gz302ea_audio_user_account
+  changed_when: false
+
+- name: Set target user runtime facts
+  ansible.builtin.set_fact:
+    arch_gz302ea_audio_uid: "{{ arch_gz302ea_audio_user_id.stdout }}"
+    arch_gz302ea_audio_group: "{{ arch_gz302ea_audio_user_group.stdout }}"
+    arch_gz302ea_audio_runtime_dir: "/run/user/{{ arch_gz302ea_audio_user_id.stdout }}"
+
+- name: Require target user's configured home directory
+  ansible.builtin.assert:
+    that:
+      - arch_gz302ea_audio_user_account.stdout.split(':')[5] == user_home
+    fail_msg: >-
+      user_home={{ user_home }} does not match {{ user_name }}'s passwd home
+      {{ arch_gz302ea_audio_user_account.stdout.split(':')[5] }}.
+
+- name: Check target user runtime directory
+  ansible.builtin.stat:
+    path: "{{ arch_gz302ea_audio_runtime_dir }}"
+  register: arch_gz302ea_audio_runtime
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Require an active target user runtime directory
+  ansible.builtin.assert:
+    that:
+      - arch_gz302ea_audio_runtime.stat.isdir | default(false)
+    fail_msg: >-
+      {{ arch_gz302ea_audio_runtime_dir }} is unavailable. Run this playbook from
+      an active {{ user_name }} login session, or set
+      arch_gz302ea_audio_manage_runtime=false for offline provisioning.
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Check target user systemd manager
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/systemctl
+      - --user
+      - show-environment
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Check existing EasyEffects service state
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/systemctl
+      - --user
+      - is-active
+      - easyeffects.service
+  register: arch_gz302ea_audio_existing_service
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Check for an unmanaged EasyEffects process
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/pgrep
+      - -u
+      - "{{ arch_gz302ea_audio_uid }}"
+      - -x
+      - easyeffects
+  register: arch_gz302ea_audio_existing_process
+  changed_when: false
+  failed_when: false
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Require systemd ownership of an existing EasyEffects process
+  ansible.builtin.assert:
+    that:
+      - >-
+        arch_gz302ea_audio_existing_process.rc != 0 or
+        arch_gz302ea_audio_existing_service.stdout == 'active'
+    fail_msg: >-
+      EasyEffects is already running outside easyeffects.service. Quit it before
+      running this playbook so systemd can own the process.
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Install GZ302EA audio packages
+  community.general.pacman:
+    name: "{{ arch_gz302ea_audio_packages + [arch_gz302ea_audio_firmware_package] }}"
+    state: present
+
+- name: Check selected CS35L41 firmware configuration
+  ansible.builtin.stat:
+    path: "{{ arch_gz302ea_audio_firmware_dir }}/cs35l41/bincfgs/cs35l41-dsp1-{{ arch_gz302ea_audio_firmware_gain }}.bincfg.zst"
+  register: arch_gz302ea_audio_firmware_config
+
+- name: Require selected CS35L41 firmware configuration
+  ansible.builtin.assert:
+    that:
+      - arch_gz302ea_audio_firmware_config.stat.exists
+    fail_msg: >-
+      linux-firmware-cirrus does not provide the selected
+      {{ arch_gz302ea_audio_firmware_gain }} CS35L41 configuration.
+
+- name: Inspect package-managed GZ302EA firmware links
+  ansible.builtin.stat:
+    path: "{{ arch_gz302ea_audio_firmware_dir }}/{{ item }}"
+    follow: false
+  loop: "{{ arch_gz302ea_audio_firmware_links }}"
+  register: arch_gz302ea_audio_packaged_links
+
+- name: Require package-managed GZ302EA firmware links
+  ansible.builtin.assert:
+    that:
+      - >-
+        arch_gz302ea_audio_packaged_links.results
+        | map(attribute='stat.islnk')
+        | select('equalto', true)
+        | list
+        | length == arch_gz302ea_audio_firmware_links | length
+    fail_msg: >-
+      {{ arch_gz302ea_audio_firmware_package }} no longer provides the expected
+      GZ302EA firmware links; refusing to replace an unknown file layout.
+
+- name: Ensure pacman hook helper directory exists
+  ansible.builtin.file:
+    path: "{{ arch_gz302ea_audio_hook_helper | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install GZ302EA firmware link helper
+  ansible.builtin.template:
+    src: gz302ea-speaker-gain.j2
+    dest: "{{ arch_gz302ea_audio_hook_helper }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure pacman hooks directory exists
+  ansible.builtin.file:
+    path: "{{ arch_gz302ea_audio_pacman_hook | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install linux-firmware-cirrus pacman hook
+  ansible.builtin.template:
+    src: gz302ea-speaker-gain.hook.j2
+    dest: "{{ arch_gz302ea_audio_pacman_hook }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Select CS35L41 amplifier gain configuration
+  ansible.builtin.file:
+    src: "cs35l41/bincfgs/cs35l41-dsp1-{{ arch_gz302ea_audio_firmware_gain }}.bincfg.zst"
+    dest: "{{ arch_gz302ea_audio_firmware_dir }}/{{ item }}"
+    state: link
+    force: true
+    owner: root
+    group: root
+  loop: "{{ arch_gz302ea_audio_firmware_links }}"
+  register: arch_gz302ea_audio_firmware_link_results
+
+- name: Report firmware reboot requirement
+  ansible.builtin.debug:
+    msg: Reboot to load the selected CS35L41 amplifier gain configuration.
+  when: arch_gz302ea_audio_firmware_link_results is changed
+
+- name: Ensure EasyEffects preset directory exists
+  ansible.builtin.file:
+    path: "{{ arch_gz302ea_audio_preset_dir }}"
+    state: directory
+    owner: "{{ user_name }}"
+    group: "{{ arch_gz302ea_audio_group }}"
+    mode: "0755"
+
+- name: Install GZ302EA EasyEffects output preset
+  ansible.builtin.copy:
+    src: GZ302-Metal.json
+    dest: "{{ arch_gz302ea_audio_preset_dir }}/{{ arch_gz302ea_audio_preset_name }}.json"
+    owner: "{{ user_name }}"
+    group: "{{ arch_gz302ea_audio_group }}"
+    mode: "0644"
+  register: arch_gz302ea_audio_preset
+
+- name: Ensure user systemd unit directory exists
+  ansible.builtin.file:
+    path: "{{ arch_gz302ea_audio_user_unit_dir }}"
+    state: directory
+    owner: "{{ user_name }}"
+    group: "{{ arch_gz302ea_audio_group }}"
+    mode: "0755"
+
+- name: Install EasyEffects user service
+  ansible.builtin.copy:
+    src: easyeffects.service
+    dest: "{{ arch_gz302ea_audio_user_unit_dir }}/easyeffects.service"
+    owner: "{{ user_name }}"
+    group: "{{ arch_gz302ea_audio_group }}"
+    mode: "0644"
+  register: arch_gz302ea_audio_user_unit
+
+- name: Enable and start EasyEffects user service
+  ansible.builtin.systemd_service:
+    name: easyeffects.service
+    scope: user
+    daemon_reload: true
+    enabled: "{{ arch_gz302ea_audio_easyeffects_enabled | bool }}"
+    state: >-
+      {{ 'restarted' if (arch_gz302ea_audio_easyeffects_enabled | bool and
+                         arch_gz302ea_audio_user_unit is changed)
+         else ('started' if arch_gz302ea_audio_easyeffects_enabled | bool else 'stopped') }}
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+  when: arch_gz302ea_audio_manage_runtime | bool
+
+- name: Wait for EasyEffects user service
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/systemctl
+      - --user
+      - is-active
+      - easyeffects.service
+  register: arch_gz302ea_audio_service_state
+  changed_when: false
+  retries: 10
+  delay: 1
+  until: arch_gz302ea_audio_service_state.stdout == "active"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+
+- name: Query last loaded EasyEffects output preset
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --last-loaded-preset
+      - output
+  register: arch_gz302ea_audio_last_preset
+  changed_when: false
+  retries: 10
+  delay: 1
+  until: arch_gz302ea_audio_last_preset.stdout | length > 0
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+
+- name: Load GZ302EA EasyEffects output preset
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --load-preset
+      - "{{ arch_gz302ea_audio_preset_name }}"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+    - >-
+      arch_gz302ea_audio_preset is changed or
+      arch_gz302ea_audio_last_preset.stdout != arch_gz302ea_audio_preset_name
+
+- name: Query EasyEffects global bypass state
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --bypass
+      - "3"
+  register: arch_gz302ea_audio_bypass
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+
+- name: Disable EasyEffects global bypass
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --bypass
+      - "2"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+    - arch_gz302ea_audio_bypass.stdout != "2"
+
+- name: Verify loaded EasyEffects output preset
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --last-loaded-preset
+      - output
+  register: arch_gz302ea_audio_verified_preset
+  changed_when: false
+  retries: 10
+  delay: 1
+  until: arch_gz302ea_audio_verified_preset.stdout == arch_gz302ea_audio_preset_name
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool
+
+- name: Verify EasyEffects global bypass is disabled
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/easyeffects
+      - --bypass
+      - "3"
+  register: arch_gz302ea_audio_verified_bypass
+  changed_when: false
+  retries: 10
+  delay: 1
+  until: arch_gz302ea_audio_verified_bypass.stdout == "2"
+  become: true
+  become_user: "{{ user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    XDG_RUNTIME_DIR: "{{ arch_gz302ea_audio_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ arch_gz302ea_audio_runtime_dir }}/bus"
+    QT_QPA_PLATFORM: offscreen
+  when:
+    - arch_gz302ea_audio_manage_runtime | bool
+    - arch_gz302ea_audio_easyeffects_enabled | bool

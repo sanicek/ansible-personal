@@ -1,0 +1,14 @@
+[Unit]
+Description=EasyEffects audio processing
+After=pipewire.service
+Requires=pipewire.service
+
+[Service]
+Environment=QT_QPA_PLATFORM=offscreen
+ExecStart=/usr/bin/easyeffects --service-mode --hide-window
+ExecStop=/usr/bin/easyeffects --quit
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

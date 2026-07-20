@@ -1,0 +1,184 @@
+- name: Verify Arch GZ302EA audio configuration
+  hosts: local
+  gather_facts: false
+  vars:
+    expected_firmware_target: cs35l41/bincfgs/cs35l41-dsp1-19_5dB.bincfg.zst
+    preset_path: /home/molecule/.local/share/easyeffects/output/GZ302-Metal.json
+    service_path: /home/molecule/.config/systemd/user/easyeffects.service
+  tasks:
+    - name: Check audio packages
+      ansible.builtin.command:
+        argv:
+          - pacman
+          - -Q
+          - "{{ item }}"
+      loop:
+        - easyeffects
+        - lsp-plugins-lv2
+        - linux-firmware-cirrus
+      changed_when: false
+
+    - name: Read firmware links
+      ansible.builtin.command:
+        argv:
+          - readlink
+          - "/usr/lib/firmware/cirrus/{{ item }}"
+      loop:
+        - cs35l41-dsp1-spk-prot-10431fb3-l0.bincfg.zst
+        - cs35l41-dsp1-spk-prot-10431fb3-r0.bincfg.zst
+      register: arch_gz302ea_audio_links
+      changed_when: false
+
+    - name: Assert selected firmware links
+      ansible.builtin.assert:
+        that:
+          - arch_gz302ea_audio_links.results | map(attribute='stdout') | unique | list == [expected_firmware_target]
+
+    - name: Resolve selected firmware links
+      ansible.builtin.command:
+        argv:
+          - readlink
+          - -e
+          - "/usr/lib/firmware/cirrus/{{ item }}"
+      loop:
+        - cs35l41-dsp1-spk-prot-10431fb3-l0.bincfg.zst
+        - cs35l41-dsp1-spk-prot-10431fb3-r0.bincfg.zst
+      register: arch_gz302ea_audio_resolved_links
+      changed_when: false
+
+    - name: Assert selected firmware links resolve
+      ansible.builtin.assert:
+        that:
+          - >-
+            arch_gz302ea_audio_resolved_links.results
+            | map(attribute='stdout')
+            | unique
+            | list == ['/usr/lib/firmware/cirrus/' + expected_firmware_target]
+
+    - name: Check firmware helper and pacman hook
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/local/libexec/gz302ea-speaker-gain
+        - /etc/pacman.d/hooks/gz302ea-speaker-gain.hook
+      register: arch_gz302ea_audio_system_files
+
+    - name: Assert firmware helper and hook metadata
+      ansible.builtin.assert:
+        that:
+          - arch_gz302ea_audio_system_files.results[0].stat.mode == "0755"
+          - arch_gz302ea_audio_system_files.results[0].stat.pw_name == "root"
+          - arch_gz302ea_audio_system_files.results[1].stat.mode == "0644"
+          - arch_gz302ea_audio_system_files.results[1].stat.pw_name == "root"
+
+    - name: Read firmware helper
+      ansible.builtin.slurp:
+        src: /usr/local/libexec/gz302ea-speaker-gain
+      register: arch_gz302ea_audio_helper
+
+    - name: Read pacman hook
+      ansible.builtin.slurp:
+        src: /etc/pacman.d/hooks/gz302ea-speaker-gain.hook
+      register: arch_gz302ea_audio_hook
+
+    - name: Assert firmware upgrade enforcement
+      ansible.builtin.assert:
+        that:
+          - expected_firmware_target in (arch_gz302ea_audio_helper.content | b64decode)
+          - "'Target = linux-firmware-cirrus' in (arch_gz302ea_audio_hook.content | b64decode)"
+          - "'When = PostTransaction' in (arch_gz302ea_audio_hook.content | b64decode)"
+          - "'Exec = /usr/local/libexec/gz302ea-speaker-gain' in (arch_gz302ea_audio_hook.content | b64decode)"
+
+    - name: Hide selected firmware source for helper failure test
+      ansible.builtin.command:
+        argv:
+          - mv
+          - /usr/lib/firmware/cirrus/cs35l41/bincfgs/cs35l41-dsp1-19_5dB.bincfg.zst
+          - /usr/lib/firmware/cirrus/cs35l41/bincfgs/cs35l41-dsp1-19_5dB.bincfg.zst.molecule-disabled
+      become: true
+
+    - name: Verify helper fails safely without selected firmware
+      block:
+        - name: Run firmware helper without selected firmware
+          ansible.builtin.command: /usr/local/libexec/gz302ea-speaker-gain
+          register: arch_gz302ea_audio_failed_helper
+          changed_when: false
+          failed_when: false
+          become: true
+
+        - name: Read firmware links after helper failure
+          ansible.builtin.command:
+            argv:
+              - readlink
+              - "/usr/lib/firmware/cirrus/{{ item }}"
+          loop:
+            - cs35l41-dsp1-spk-prot-10431fb3-l0.bincfg.zst
+            - cs35l41-dsp1-spk-prot-10431fb3-r0.bincfg.zst
+          register: arch_gz302ea_audio_links_after_failure
+          changed_when: false
+
+        - name: Assert helper failure preserved firmware links
+          ansible.builtin.assert:
+            that:
+              - arch_gz302ea_audio_failed_helper.rc != 0
+              - arch_gz302ea_audio_links_after_failure.results | map(attribute='stdout') | unique | list == [expected_firmware_target]
+      always:
+        - name: Restore selected firmware source
+          ansible.builtin.command:
+            argv:
+              - mv
+              - /usr/lib/firmware/cirrus/cs35l41/bincfgs/cs35l41-dsp1-19_5dB.bincfg.zst.molecule-disabled
+              - /usr/lib/firmware/cirrus/cs35l41/bincfgs/cs35l41-dsp1-19_5dB.bincfg.zst
+          become: true
+
+    - name: Check user-managed file metadata
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ preset_path }}"
+        - "{{ service_path }}"
+      register: arch_gz302ea_audio_user_files
+
+    - name: Assert user-managed file metadata
+      ansible.builtin.assert:
+        that:
+          - arch_gz302ea_audio_user_files.results | map(attribute='stat.mode') | unique | list == ["0644"]
+          - arch_gz302ea_audio_user_files.results | map(attribute='stat.pw_name') | unique | list == ["molecule"]
+          - arch_gz302ea_audio_user_files.results | map(attribute='stat.gr_name') | unique | list == ["molecule"]
+
+    - name: Read EasyEffects preset
+      ansible.builtin.slurp:
+        src: "{{ preset_path }}"
+      register: arch_gz302ea_audio_preset_file
+
+    - name: Parse EasyEffects preset
+      ansible.builtin.set_fact:
+        arch_gz302ea_audio_preset: "{{ arch_gz302ea_audio_preset_file.content | b64decode | from_json }}"
+
+    - name: Assert EasyEffects preset structure
+      ansible.builtin.assert:
+        that:
+          - arch_gz302ea_audio_preset.output.blocklist == []
+          - arch_gz302ea_audio_preset.output.plugins_order == ["equalizer#0", "limiter#0"]
+          - arch_gz302ea_audio_preset.output["equalizer#0"]["input-gain"] == -2.0
+          - arch_gz302ea_audio_preset.output["equalizer#0"]["num-bands"] == 7
+          - arch_gz302ea_audio_preset.output["equalizer#0"].left == arch_gz302ea_audio_preset.output["equalizer#0"].right
+          - arch_gz302ea_audio_preset.output["equalizer#0"].left.band0.type == "Hi-pass"
+          - arch_gz302ea_audio_preset.output["equalizer#0"].left.band0.frequency == 55.0
+          - arch_gz302ea_audio_preset.output["equalizer#0"].left.band6.type == "Hi-shelf"
+          - arch_gz302ea_audio_preset.output["equalizer#0"].left.band6.frequency == 8000.0
+          - arch_gz302ea_audio_preset.output["limiter#0"].threshold == -1.0
+          - arch_gz302ea_audio_preset.output["limiter#0"].oversampling == "True Peak/16 bit"
+          - arch_gz302ea_audio_preset.output["limiter#0"]["stereo-link"] == 100.0
+
+    - name: Read EasyEffects user service
+      ansible.builtin.slurp:
+        src: "{{ service_path }}"
+      register: arch_gz302ea_audio_service
+
+    - name: Assert headless EasyEffects service configuration
+      ansible.builtin.assert:
+        that:
+          - "'Environment=QT_QPA_PLATFORM=offscreen' in (arch_gz302ea_audio_service.content | b64decode)"
+          - "'ExecStart=/usr/bin/easyeffects --service-mode --hide-window' in (arch_gz302ea_audio_service.content | b64decode)"
+          - "'WantedBy=default.target' in (arch_gz302ea_audio_service.content | b64decode)"
