@@ -6,4 +6,4 @@
 - [ ] Discover and evaluate skills from the skill registry that match the current repo scope (Ansible collections, personal workstation config).
 - [ ] Create a ComfyUI playbook/role for Arch (image generation / Stable Diffusion tooling).
 - [x] Create a RimWorld mod development playbook/role for Arch.
-- [ ] Create a Godot Engine game development playbook/role for Arch.
+- [x] Create a Godot Engine game development playbook/role for Arch.

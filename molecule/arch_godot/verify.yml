@@ -1,0 +1,26 @@
+- name: Verify Arch Godot game development environment
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Check Godot package
+      ansible.builtin.command: pacman -Q godot
+      register: arch_godot_package
+      changed_when: false
+
+    - name: Check Godot executable
+      ansible.builtin.stat:
+        path: /usr/bin/godot
+      register: arch_godot_binary
+
+    - name: Check Godot version
+      ansible.builtin.command: godot --headless --version
+      register: arch_godot_version
+      changed_when: false
+
+    - name: Assert Godot is installed and runnable
+      ansible.builtin.assert:
+        that:
+          - "'godot' in arch_godot_package.stdout"
+          - arch_godot_binary.stat.exists
+          - arch_godot_binary.stat.executable
+          - arch_godot_version.stdout | length > 0

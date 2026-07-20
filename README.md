@@ -53,6 +53,8 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.ym
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_rimworld_modding.yml
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_godot.yml
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml
 ```
@@ -102,6 +104,8 @@ scripts/validate.sh arch_terminal
 scripts/validate.sh arch_cloud
 scripts/validate.sh arch_k8s
 scripts/validate.sh arch_opencode
+scripts/validate.sh arch_rimworld_modding
+scripts/validate.sh arch_godot
 ```
 
 ### Individual Commands
@@ -116,6 +120,8 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_terminal.ym
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_shell.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_cloud.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_k8s.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_rimworld_modding.yml --syntax-check
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_godot.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_ollama.yml --syntax-check
 ansible-playbook ansible_collections/sanicek/server/playbooks/arch_sshd.yml --syntax-check
 ansible-galaxy collection build ansible_collections/sanicek/personal --force
@@ -125,4 +131,6 @@ molecule test -s arch_terminal
 molecule test -s arch_cloud
 molecule test -s arch_k8s
 molecule test -s arch_opencode
+molecule test -s arch_rimworld_modding
+molecule test -s arch_godot
 ```

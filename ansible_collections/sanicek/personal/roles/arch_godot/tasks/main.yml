@@ -1,0 +1,4 @@
+- name: Install Godot game development packages
+  community.general.pacman:
+    name: "{{ arch_godot_packages }}"
+    state: present
