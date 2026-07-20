@@ -107,6 +107,14 @@ validate_arch_rimworld_modding() {
   run_molecule_scenarios arch_rimworld_modding
 }
 
+validate_arch_godot() {
+  preflight
+  install_dependencies
+  syntax_check_playbooks ansible_collections/sanicek/personal/playbooks/arch_godot.yml
+  build_personal_collection
+  run_molecule_scenarios arch_godot
+}
+
 validate_full() {
   local playbooks=(
     ansible_collections/sanicek/personal/playbooks/fedora_workstation.yml
@@ -121,6 +129,7 @@ validate_full() {
     ansible_collections/sanicek/personal/playbooks/arch_cloud.yml
     ansible_collections/sanicek/personal/playbooks/arch_k8s.yml
     ansible_collections/sanicek/personal/playbooks/arch_rimworld_modding.yml
+    ansible_collections/sanicek/personal/playbooks/arch_godot.yml
     ansible_collections/sanicek/personal/playbooks/arch_molecule.yml
     ansible_collections/sanicek/server/playbooks/arch_ollama.yml
     ansible_collections/sanicek/server/playbooks/arch_sshd.yml
@@ -130,11 +139,11 @@ validate_full() {
   install_dependencies
   syntax_check_playbooks "${playbooks[@]}"
   build_all_collections
-  run_molecule_scenarios arch_shell arch_terminal arch_cloud arch_k8s arch_opencode arch_rimworld_modding
+  run_molecule_scenarios arch_shell arch_terminal arch_cloud arch_k8s arch_opencode arch_rimworld_modding arch_godot
 }
 
 usage() {
-  printf 'Usage: %s [full|arch_shell|arch_terminal|arch_cloud|arch_k8s|arch_opencode|arch_rimworld_modding]\n' "${0##*/}" >&2
+  printf 'Usage: %s [full|arch_shell|arch_terminal|arch_cloud|arch_k8s|arch_opencode|arch_rimworld_modding|arch_godot]\n' "${0##*/}" >&2
 }
 
 target="${1:-full}"
@@ -160,6 +169,9 @@ case "$target" in
     ;;
   arch_rimworld_modding)
     validate_arch_rimworld_modding
+    ;;
+  arch_godot)
+    validate_arch_godot
     ;;
   -h|--help|help)
     usage
