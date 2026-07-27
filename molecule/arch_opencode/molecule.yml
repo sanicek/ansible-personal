@@ -34,6 +34,13 @@ platforms:
     command: /usr/bin/sleep infinity
     groups:
       - local
+  - name: omo-cleanup
+    dockerfile: Dockerfile.j2
+    image: docker.io/archlinux:latest
+    pre_build_image: false
+    command: /usr/bin/sleep infinity
+    groups:
+      - local
 provisioner:
   name: ansible
   env:
@@ -43,6 +50,7 @@ provisioner:
       local:
         bootstrap_user_home: /home/molecule
         bootstrap_user_name: molecule
+        arch_opencode_cleanup_omo: false
     host_vars:
       install-only:
         ansible_become_method: sudo
@@ -64,6 +72,12 @@ provisioner:
         ansible_python_interpreter: /usr/bin/python3
         ansible_user: molecule
         arch_opencode_profile: omo-slim-cloud-copilot
+      omo-cleanup:
+        ansible_become_method: sudo
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: molecule
+        arch_opencode_profile: ""
+        arch_opencode_cleanup_omo: true
 scenario:
   test_sequence:
     - dependency
