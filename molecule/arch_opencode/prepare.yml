@@ -149,7 +149,7 @@
         group: molecule
       become: true
 
-    - name: Seed unknown sibling/auth file on cloud profile
+    - name: Seed unknown sibling/auth file
       ansible.builtin.copy:
         dest: /home/molecule/.config/opencode/auth.json
         mode: "0600"
@@ -159,4 +159,124 @@
           {
             "token": "test-auth-token-should-survive"
           }
+      become: true
+
+- name: Seed Oh My OpenCode artifacts for cleanup host
+  hosts: omo-cleanup
+  gather_facts: false
+  vars:
+    cleanup_skill_dirs:
+      - simplify
+      - codemap
+      - clonedeps
+      - deepwork
+      - reflect
+      - oh-my-opencode-slim
+      - release-smoke-test
+      - worktrees
+      - verification-planning
+  tasks:
+    - name: Ensure cleanup fixture directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      loop:
+        - /home/molecule/.config/opencode/plugins
+        - /home/molecule/.config/opencode/oh-my-opencode-slim
+        - /home/molecule/.config/opencode/.oh-my-opencode-slim
+        - /home/molecule/.config/opencode/skills
+        - /home/molecule/.cache/opencode/packages/oh-my-opencode-slim@latest
+        - /home/molecule/.local/state/opencode
+        - /home/molecule/.local/share/opencode
+        - /home/molecule/.local/share/opencode/history
+        - /home/molecule/.local/share/opencode/logs
+        - /home/molecule/.local/share/opencode/sessions
+      become: true
+
+    - name: Seed Oh My OpenCode managed skill directories
+      ansible.builtin.file:
+        path: "/home/molecule/.config/opencode/skills/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      loop: "{{ cleanup_skill_dirs }}"
+      become: true
+
+    - name: Seed Oh My OpenCode managed skill markers
+      ansible.builtin.copy:
+        dest: "/home/molecule/.config/opencode/skills/{{ item }}/marker"
+        content: "omo managed skill\n"
+        mode: "0644"
+        owner: molecule
+        group: molecule
+      loop: "{{ cleanup_skill_dirs }}"
+      become: true
+
+    - name: Seed Oh My OpenCode config files
+      ansible.builtin.copy:
+        dest: "/home/molecule/.config/opencode/{{ item.name }}"
+        content: "{{ item.content }}"
+        mode: "0644"
+        owner: molecule
+        group: molecule
+      loop:
+        - name: opencode.jsonc
+          content: '{"$schema":"https://opencode.ai/config.json","plugin":["oh-my-opencode-slim@latest"],"agent":{"explore":{"disable":true}},"lsp":true}'
+        - name: tui.jsonc
+          content: '{"$schema":"https://opencode.ai/tui.json","plugin":["oh-my-opencode-slim@latest"]}'
+        - name: oh-my-opencode-slim.json
+          content: '{"preset":"omo"}'
+        - name: oh-my-opencode-slim.jsonc
+          content: '{"preset":"omo"}'
+        - name: .runtime-state
+          content: "unrelated config state\n"
+      become: true
+
+    - name: Seed cleanup preservation and cache fixtures
+      ansible.builtin.copy:
+        dest: "{{ item.path }}"
+        content: "{{ item.content }}"
+        mode: "0644"
+        owner: molecule
+        group: molecule
+      loop:
+        - path: /home/molecule/.config/opencode/plugins/notify.ts
+          content: "// preserve notify plugin\n"
+        - path: /home/molecule/.cache/opencode/packages/oh-my-opencode-slim@latest/marker
+          content: "omo cache\n"
+        - path: /home/molecule/.local/state/opencode/plugin-meta.json
+          content: '{"omo":"cache"}'
+        - path: /home/molecule/.local/state/opencode/unrelated-state.json
+          content: '{"preserve":true}'
+        - path: /home/molecule/.local/share/opencode/history/prompts.jsonl
+          content: '{"prompt":"Oh My OpenCode historical prompt"}'
+        - path: /home/molecule/.local/share/opencode/logs/historical.log
+          content: "Oh My OpenCode historical log\n"
+        - path: /home/molecule/.local/share/opencode/sessions/session.db
+          content: "preserve session database\n"
+      become: true
+
+    - name: Seed cleanup auth fixture
+      ansible.builtin.copy:
+        dest: /home/molecule/.local/share/opencode/auth.json
+        content: '{"token":"preserve-auth"}'
+        mode: "0600"
+        owner: molecule
+        group: molecule
+      become: true
+
+    - name: Seed existing background subagent shell block
+      ansible.builtin.copy:
+        dest: /home/molecule/.bashrc
+        content: |
+          # BEGIN ANSIBLE MANAGED BLOCK opencode environment
+          export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+          # END ANSIBLE MANAGED BLOCK opencode environment
+        mode: "0644"
+        owner: molecule
+        group: molecule
       become: true

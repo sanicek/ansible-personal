@@ -5,6 +5,13 @@
     fail_msg: "Invalid opencode profile '{{ arch_opencode_profile }}'. Valid profiles: omo-slim-cloud-openai, omo-slim-hybrid-qwen35b-go, omo-slim-cloud-copilot"
   when: arch_opencode_profile | length > 0
 
+- name: Require empty profile for Oh My OpenCode cleanup
+  ansible.builtin.assert:
+    that:
+      - arch_opencode_profile | length == 0
+    fail_msg: "arch_opencode_cleanup_omo requires arch_opencode_profile to be empty."
+  when: arch_opencode_cleanup_omo | bool
+
 - name: Load opencode profile behavior vars
   ansible.builtin.include_vars:
     file: "profiles/{{ arch_opencode_profile }}.yml"
@@ -115,7 +122,42 @@
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
   become: false
-  when: arch_opencode_profile | length > 0
+  when: arch_opencode_profile | length > 0 or (arch_opencode_cleanup_omo | bool)
+
+- name: Write minimal opencode config after Oh My OpenCode cleanup
+  ansible.builtin.copy:
+    dest: "{{ arch_opencode_config_dir }}/opencode.jsonc"
+    content: |
+      {
+        "$schema": "https://opencode.ai/config.json",
+        "autoupdate": true
+      }
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_cleanup_omo | bool
+
+- name: Write minimal opencode TUI config after Oh My OpenCode cleanup
+  ansible.builtin.copy:
+    dest: "{{ arch_opencode_config_dir }}/tui.jsonc"
+    content: |
+      {
+        "$schema": "https://opencode.ai/tui.json"
+      }
+    mode: "0644"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+  become: false
+  when: arch_opencode_cleanup_omo | bool
+
+- name: Remove Oh My OpenCode managed artifacts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ arch_opencode_omo_cleanup_paths }}"
+  become: false
+  when: arch_opencode_cleanup_omo | bool
 
 - name: Deploy opencode managed config files
   ansible.builtin.copy:

@@ -21,6 +21,12 @@ Valid profile values:
 
 An invalid profile name fails early with a message listing the valid values.
 
+### Opt-in Oh My OpenCode cleanup
+
+Set `arch_opencode_cleanup_omo: true` with an empty `arch_opencode_profile` to remove known Oh-My-OpenCode-Slim artifacts while continuing to install or upgrade OpenCode. Cleanup writes minimal `opencode.jsonc` (`$schema` and `"autoupdate": true`) and `tui.jsonc` (`$schema` only), then removes `oh-my-opencode-slim.json`, `oh-my-opencode-slim.jsonc`, `oh-my-opencode-slim/`, `.oh-my-opencode-slim/`, the `simplify`, `codemap`, `clonedeps`, `deepwork`, `reflect`, `oh-my-opencode-slim`, `release-smoke-test`, `worktrees`, and `verification-planning` skill directories, `~/.cache/opencode/packages/oh-my-opencode-slim@latest/`, and `~/.local/state/opencode/plugin-meta.json`.
+
+The cleanup preserves authentication, sessions, databases, unrelated config/state files, logs, prompt history, and `plugins/notify.ts`. It also does not remove the existing `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS` `.bashrc` block. Cleanup cannot be combined with a profile. An empty profile without `arch_opencode_cleanup_omo: true` remains install-only and leaves configuration untouched.
+
 ### Managed files
 
 Each profile deploys `opencode.jsonc` and `tui.jsonc`. OmO Slim profiles (names beginning with `omo-slim-`) also deploy `oh-my-opencode-slim.json` and ensure the `oh-my-opencode-slim/` directory exists.
@@ -130,10 +136,15 @@ ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.ym
 ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_profile=omo-slim-cloud-copilot
 ```
 
+Clean up known Oh-My-OpenCode-Slim artifacts:
+```bash
+ansible-playbook ansible_collections/sanicek/personal/playbooks/arch_opencode.yml -e arch_opencode_cleanup_omo=true
+```
+
 ## Overwrite semantics
 
-The role only writes the managed files listed above. It never removes files from `~/.config/opencode/`. Switching profiles replaces managed files with the new profile's versions; switching back to no profile (`arch_opencode_profile=""`) leaves the previously-deployed managed files in place.
+Outside the opt-in `arch_opencode_cleanup_omo` mode, the role only writes the managed files listed above and never removes files from `~/.config/opencode/`. Switching profiles replaces managed files with the new profile's versions; switching back to no profile (`arch_opencode_profile=""`) leaves previously-deployed managed files in place. Opt-in cleanup removes only its documented known OmO artifacts and writes the minimal core and TUI configs.
 
-Shell environment configuration (e.g., `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS`) is only written to `.bashrc` when a profile is selected. Install-only runs do not touch `.bashrc` or any config files.
+Shell environment configuration (e.g., `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS`) is only written to `.bashrc` when a profile is selected. Ordinary install-only runs do not touch `.bashrc` or any config files; cleanup mode writes only the documented minimal configs and leaves `.bashrc` unchanged.
 
 Re-running the same profile is safe and idempotent: managed profile files are refreshed and Bun runs only when the installed OpenCode version differs from the resolved latest stable npm release.

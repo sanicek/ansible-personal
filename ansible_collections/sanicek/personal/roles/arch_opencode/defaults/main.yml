@@ -8,8 +8,27 @@ arch_opencode_binary: "{{ arch_opencode_bun_global_bin }}/opencode"
 arch_opencode_system_link: /usr/local/bin/opencode
 
 arch_opencode_profile: ""
+arch_opencode_cleanup_omo: false
 
 arch_opencode_config_dir: "{{ user_home }}/.config/opencode"
+arch_opencode_cache_dir: "{{ user_home }}/.cache/opencode"
+arch_opencode_state_dir: "{{ user_home }}/.local/state/opencode"
+arch_opencode_omo_cleanup_paths:
+  - "{{ arch_opencode_config_dir }}/oh-my-opencode-slim.json"
+  - "{{ arch_opencode_config_dir }}/oh-my-opencode-slim.jsonc"
+  - "{{ arch_opencode_config_dir }}/oh-my-opencode-slim"
+  - "{{ arch_opencode_config_dir }}/.oh-my-opencode-slim"
+  - "{{ arch_opencode_config_dir }}/skills/simplify"
+  - "{{ arch_opencode_config_dir }}/skills/codemap"
+  - "{{ arch_opencode_config_dir }}/skills/clonedeps"
+  - "{{ arch_opencode_config_dir }}/skills/deepwork"
+  - "{{ arch_opencode_config_dir }}/skills/reflect"
+  - "{{ arch_opencode_config_dir }}/skills/oh-my-opencode-slim"
+  - "{{ arch_opencode_config_dir }}/skills/release-smoke-test"
+  - "{{ arch_opencode_config_dir }}/skills/worktrees"
+  - "{{ arch_opencode_config_dir }}/skills/verification-planning"
+  - "{{ arch_opencode_cache_dir }}/packages/oh-my-opencode-slim@latest"
+  - "{{ arch_opencode_state_dir }}/plugin-meta.json"
 arch_opencode_managed_files:
   - opencode.jsonc
   - tui.jsonc

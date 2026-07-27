@@ -49,12 +49,12 @@
       ansible.builtin.slurp:
         path: /home/molecule/.config/opencode/opencode.jsonc
       register: arch_opencode_seeded_core_config
-      when: arch_opencode_profile | length == 0
+      when: arch_opencode_profile | length == 0 and not arch_opencode_cleanup_omo
 
     - name: Check seeded install-only config is unchanged
       ansible.builtin.set_fact:
         arch_opencode_seeded_core: "{{ arch_opencode_seeded_core_config.content | b64decode | from_json }}"
-      when: arch_opencode_profile | length == 0
+      when: arch_opencode_profile | length == 0 and not arch_opencode_cleanup_omo
 
     - name: Assert install-only leaves managed config untouched
       ansible.builtin.assert:
@@ -71,7 +71,106 @@
           - arch_opencode_lazyskills_version.rc == 0
           - "'preexisting-plugin@1.0' in arch_opencode_seeded_core.plugin"
           - not arch_opencode_seeded_core.lsp
-      when: arch_opencode_profile | length == 0
+      when: arch_opencode_profile | length == 0 and not arch_opencode_cleanup_omo
+
+    # --- Oh My OpenCode cleanup assertions ---
+    - name: Read minimal cleanup configs
+      ansible.builtin.slurp:
+        path: "/home/molecule/.config/opencode/{{ item }}"
+      loop:
+        - opencode.jsonc
+        - tui.jsonc
+      register: arch_opencode_cleanup_configs
+      when: arch_opencode_cleanup_omo
+
+    - name: Parse minimal cleanup configs
+      ansible.builtin.set_fact:
+        arch_opencode_cleanup_core: "{{ arch_opencode_cleanup_configs.results[0].content | b64decode | from_json }}"
+        arch_opencode_cleanup_tui: "{{ arch_opencode_cleanup_configs.results[1].content | b64decode | from_json }}"
+      when: arch_opencode_cleanup_omo
+
+    - name: Check removed Oh My OpenCode artifacts
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /home/molecule/.config/opencode/oh-my-opencode-slim.json
+        - /home/molecule/.config/opencode/oh-my-opencode-slim.jsonc
+        - /home/molecule/.config/opencode/oh-my-opencode-slim
+        - /home/molecule/.config/opencode/.oh-my-opencode-slim
+        - /home/molecule/.config/opencode/skills/simplify
+        - /home/molecule/.config/opencode/skills/codemap
+        - /home/molecule/.config/opencode/skills/clonedeps
+        - /home/molecule/.config/opencode/skills/deepwork
+        - /home/molecule/.config/opencode/skills/reflect
+        - /home/molecule/.config/opencode/skills/oh-my-opencode-slim
+        - /home/molecule/.config/opencode/skills/release-smoke-test
+        - /home/molecule/.config/opencode/skills/worktrees
+        - /home/molecule/.config/opencode/skills/verification-planning
+        - /home/molecule/.cache/opencode/packages/oh-my-opencode-slim@latest
+        - /home/molecule/.local/state/opencode/plugin-meta.json
+      register: arch_opencode_cleanup_removed
+      when: arch_opencode_cleanup_omo
+
+    - name: Check cleanup preservation fixtures
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /home/molecule/.config/opencode/plugins/notify.ts
+        - /home/molecule/.config/opencode/.runtime-state
+        - /home/molecule/.local/state/opencode/unrelated-state.json
+        - /home/molecule/.local/share/opencode/auth.json
+        - /home/molecule/.local/share/opencode/history/prompts.jsonl
+        - /home/molecule/.local/share/opencode/logs/historical.log
+        - /home/molecule/.local/share/opencode/sessions/session.db
+        - /home/molecule/.bashrc
+      register: arch_opencode_cleanup_preserved
+      when: arch_opencode_cleanup_omo
+
+    - name: Read preserved cleanup shell configuration
+      ansible.builtin.slurp:
+        path: /home/molecule/.bashrc
+      register: arch_opencode_cleanup_bashrc
+      when: arch_opencode_cleanup_omo
+
+    - name: Read preserved cleanup notify plugin
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/plugins/notify.ts
+      register: arch_opencode_cleanup_notify
+      when: arch_opencode_cleanup_omo
+
+    - name: Read preserved cleanup auth
+      ansible.builtin.slurp:
+        path: /home/molecule/.local/share/opencode/auth.json
+      register: arch_opencode_cleanup_auth
+      when: arch_opencode_cleanup_omo
+
+    - name: Assert Oh My OpenCode cleanup
+      ansible.builtin.assert:
+        that:
+          - "'bun' in arch_opencode_bun.stdout"
+          - arch_opencode_pacman_package.rc != 0
+          - arch_opencode_bun_binary.stat.exists
+          - arch_opencode_bun_binary.stat.executable
+          - arch_opencode_bun_version.rc == 0
+          - arch_opencode_system_link.stat.islnk
+          - (arch_opencode_cleanup_core.keys() | list | sort) == ['$schema', 'autoupdate']
+          - arch_opencode_cleanup_core['$schema'] == 'https://opencode.ai/config.json'
+          - arch_opencode_cleanup_core.autoupdate
+          - arch_opencode_cleanup_core.plugin is not defined
+          - arch_opencode_cleanup_core.agent is not defined
+          - arch_opencode_cleanup_core.lsp is not defined
+          - (arch_opencode_cleanup_tui.keys() | list | sort) == ['$schema']
+          - arch_opencode_cleanup_tui['$schema'] == 'https://opencode.ai/tui.json'
+          - arch_opencode_cleanup_tui.plugin is not defined
+          - arch_opencode_cleanup_removed.results | map(attribute='stat.exists') | select | list | length == 0
+          - arch_opencode_cleanup_preserved.results | map(attribute='stat.exists') | select | list | length == 8
+          - arch_opencode_cleanup_preserved.results[3].stat.mode == '0600'
+          - arch_opencode_cleanup_preserved.results[3].stat.pw_name == 'molecule'
+          - arch_opencode_cleanup_preserved.results[3].stat.gr_name == 'molecule'
+          - (arch_opencode_cleanup_auth.content | b64decode) == '{"token":"preserve-auth"}'
+          - "'preserve notify plugin' in (arch_opencode_cleanup_notify.content | b64decode)"
+          - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in (arch_opencode_cleanup_bashrc.content | b64decode)"
+      when: arch_opencode_cleanup_omo
 
     # --- Profile configuration checks ---
     - name: Read opencode core config
