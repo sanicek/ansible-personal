@@ -25,7 +25,9 @@ An invalid profile name fails early with a message listing the valid values.
 
 Set `arch_opencode_cleanup_omo: true` with an empty `arch_opencode_profile` to remove known Oh-My-OpenCode-Slim artifacts while continuing to install or upgrade OpenCode. Cleanup writes minimal `opencode.jsonc` (`$schema` and `"autoupdate": true`) and `tui.jsonc` (`$schema` only), then removes `oh-my-opencode-slim.json`, `oh-my-opencode-slim.jsonc`, `oh-my-opencode-slim/`, `.oh-my-opencode-slim/`, the `simplify`, `codemap`, `clonedeps`, `deepwork`, `reflect`, `oh-my-opencode-slim`, `release-smoke-test`, `worktrees`, and `verification-planning` skill directories, `~/.cache/opencode/packages/oh-my-opencode-slim@latest/`, and `~/.local/state/opencode/plugin-meta.json`.
 
-The cleanup preserves authentication, sessions, databases, unrelated config/state files, logs, prompt history, and `plugins/notify.ts`. It also does not remove the existing `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS` `.bashrc` block. Cleanup cannot be combined with a profile. An empty profile without `arch_opencode_cleanup_omo: true` remains install-only and leaves configuration untouched.
+The cleanup preserves authentication, sessions, databases, unrelated config/state files, logs, prompt history, and unrelated plugins (including Herdr). It also does not remove the existing `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS` `.bashrc` block. Cleanup cannot be combined with a profile. An empty profile without `arch_opencode_cleanup_omo: true` remains install-only and leaves configuration untouched.
+
+Profile deployment and opt-in cleanup remove the obsolete V1 `plugins/notify.ts` plugin. Notifications are handled by Herdr instead; this role does not install or configure Herdr.
 
 ### Managed files
 

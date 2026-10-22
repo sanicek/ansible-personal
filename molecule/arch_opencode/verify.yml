@@ -115,7 +115,7 @@
       ansible.builtin.stat:
         path: "{{ item }}"
       loop:
-        - /home/molecule/.config/opencode/plugins/notify.ts
+        - /home/molecule/.config/opencode/plugins/herdr-agent-state.js
         - /home/molecule/.config/opencode/.runtime-state
         - /home/molecule/.local/state/opencode/unrelated-state.json
         - /home/molecule/.local/share/opencode/auth.json
@@ -130,12 +130,6 @@
       ansible.builtin.slurp:
         path: /home/molecule/.bashrc
       register: arch_opencode_cleanup_bashrc
-      when: arch_opencode_cleanup_omo
-
-    - name: Read preserved cleanup notify plugin
-      ansible.builtin.slurp:
-        path: /home/molecule/.config/opencode/plugins/notify.ts
-      register: arch_opencode_cleanup_notify
       when: arch_opencode_cleanup_omo
 
     - name: Read preserved cleanup auth
@@ -168,7 +162,6 @@
           - arch_opencode_cleanup_preserved.results[3].stat.pw_name == 'molecule'
           - arch_opencode_cleanup_preserved.results[3].stat.gr_name == 'molecule'
           - (arch_opencode_cleanup_auth.content | b64decode) == '{"token":"preserve-auth"}'
-          - "'preserve notify plugin' in (arch_opencode_cleanup_notify.content | b64decode)"
           - "'OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS' in (arch_opencode_cleanup_bashrc.content | b64decode)"
       when: arch_opencode_cleanup_omo
 
@@ -316,33 +309,26 @@
           - arch_opencode_slim_dir_stat.stat.gr_name == 'molecule'
       when: arch_opencode_profile is match('^omo-slim-')
 
-    # --- Notify plugin deployment checks ---
-    - name: Check notify plugin deployed on configured profiles
+    # --- Legacy notify removal and unrelated plugin preservation ---
+    - name: Check legacy notify plugin
       ansible.builtin.stat:
         path: /home/molecule/.config/opencode/plugins/notify.ts
       register: arch_opencode_notify_stat
-      when: arch_opencode_profile | length > 0
 
-    - name: Read deployed notify plugin on configured profiles
-      ansible.builtin.slurp:
-        path: /home/molecule/.config/opencode/plugins/notify.ts
-      register: arch_opencode_notify_content
-      when: arch_opencode_profile | length > 0
-
-    - name: Load expected notify plugin source
-      ansible.builtin.set_fact:
-        expected_notify: "{{ lookup('file', playbook_dir ~ '/../../ansible_collections/sanicek/personal/roles/arch_opencode/files/notify.ts', rstrip=false) }}"
-      run_once: true
-
-    - name: Assert notify plugin deployed and matches source on configured profiles
+    - name: Assert legacy notify plugin removed except on install-only
       ansible.builtin.assert:
         that:
-          - arch_opencode_notify_stat.stat.exists
-          - arch_opencode_notify_stat.stat.mode == '0644'
-          - arch_opencode_notify_stat.stat.pw_name == 'molecule'
-          - arch_opencode_notify_stat.stat.gr_name == 'molecule'
-          - (arch_opencode_notify_content.content | b64decode) == expected_notify
-      when: arch_opencode_profile | length > 0
+          - arch_opencode_notify_stat.stat.exists == (arch_opencode_profile | length == 0 and not arch_opencode_cleanup_omo)
+
+    - name: Read unrelated Herdr plugin
+      ansible.builtin.slurp:
+        path: /home/molecule/.config/opencode/plugins/herdr-agent-state.js
+      register: arch_opencode_herdr_content
+
+    - name: Assert unrelated Herdr plugin remains unchanged
+      ansible.builtin.assert:
+        that:
+          - (arch_opencode_herdr_content.content | b64decode) == "// preserve Herdr plugin\n"
 
     # --- Cross-profile OpenAI preset identity check ---
     - name: Assert cloud and hybrid OpenAI presets stay identical
