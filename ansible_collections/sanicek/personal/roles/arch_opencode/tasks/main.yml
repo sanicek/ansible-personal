@@ -191,25 +191,12 @@
   loop: "{{ arch_opencode_omo_slim_managed_files }}"
   when: arch_opencode_profile is match('^omo-slim-')
 
-- name: Ensure opencode plugins directory exists
+- name: Remove legacy V1 notify plugin
   ansible.builtin.file:
-    path: "{{ arch_opencode_config_dir }}/plugins"
-    state: directory
-    mode: "0755"
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
+    path: "{{ arch_opencode_config_dir }}/plugins/notify.ts"
+    state: absent
   become: false
-  when: arch_opencode_profile | length > 0
-
-- name: Deploy notify plugin
-  ansible.builtin.copy:
-    src: notify.ts
-    dest: "{{ arch_opencode_config_dir }}/plugins/notify.ts"
-    mode: "0644"
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-  become: false
-  when: arch_opencode_profile | length > 0
+  when: arch_opencode_profile | length > 0 or (arch_opencode_cleanup_omo | bool)
 
 - name: Build opencode shell environment
   ansible.builtin.set_fact:

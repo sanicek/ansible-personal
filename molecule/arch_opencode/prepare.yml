@@ -7,6 +7,29 @@
         update_cache: true
       become: true
 
+    - name: Ensure plugin fixture directory exists
+      ansible.builtin.file:
+        path: /home/molecule/.config/opencode/plugins
+        state: directory
+        mode: "0755"
+        owner: molecule
+        group: molecule
+      become: true
+
+    - name: Seed legacy notify and unrelated Herdr plugin fixtures
+      ansible.builtin.copy:
+        dest: "/home/molecule/.config/opencode/plugins/{{ item.name }}"
+        content: "{{ item.content }}"
+        mode: "0644"
+        owner: molecule
+        group: molecule
+      loop:
+        - name: notify.ts
+          content: "// legacy V1 notify plugin\n"
+        - name: herdr-agent-state.js
+          content: "// preserve Herdr plugin\n"
+      become: true
+
 - name: Seed managed config on install-only host
   hosts: install-only
   gather_facts: false
@@ -244,8 +267,6 @@
         owner: molecule
         group: molecule
       loop:
-        - path: /home/molecule/.config/opencode/plugins/notify.ts
-          content: "// preserve notify plugin\n"
         - path: /home/molecule/.cache/opencode/packages/oh-my-opencode-slim@latest/marker
           content: "omo cache\n"
         - path: /home/molecule/.local/state/opencode/plugin-meta.json
